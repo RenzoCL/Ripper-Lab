@@ -1,129 +1,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Universal - Ripper</title>
-    <style>
-        :root { --rojo-ripper: #ff0000; --gris-oscuro: #121212; }
-        body { background: black; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
-        
-        /* Contenedor de Info */
-        .header-info { margin-bottom: 20px; }
-        .header-info h1 { font-size: 1.5rem; margin: 5px 0; color: var(--rojo-ripper); }
-        .header-info p { margin: 2px 0; color: #ccc; }
-
-        /* Video más pequeño y centrado */
-        #video-frame {
-            width: 100%;
-            max-width: 640px; /* Tamaño reducido */
-            aspect-ratio: 16 / 9;
-            background: #000;
-            margin: 0 auto;
-            position: relative;
-            border: 2px solid #333;
-        }
-        
-        iframe { width: 100%; height: 100%; border: none; }
-
-        /* Capa Invisible para bloquear YouTube */
-        .capa-bloqueo {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; cursor: default;
-        }
-
-        /* Controles */
-        .controles {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        button {
-            background: #222; border: 1px solid #444; color: white;
-            padding: 10px 15px; cursor: pointer; border-radius: 5px; transition: 0.3s;
-        }
-        button:hover { background: var(--rojo-ripper); border-color: white; }
-        #btn-play { 
-            background: var(--rojo-ripper); font-weight: bold; min-width: 100px; 
-        }
-    </style>
-</head>
+    </head>
 <body>
 
     <div class="header-info">
-        <h1 id="txt-titulo">Cargando...</h1>
+        <h1 id="txt-titulo"></h1>
         <p id="txt-banda"></p>
         <p>Tonalidad: <b id="txt-tono"></b></p>
     </div>
 
     <div id="video-frame">
         <div class="capa-bloqueo"></div>
-        <div id="player"></div> </div>
+        <div id="player"></div> 
+    </div>
 
     <div class="controles">
         <button onclick="seek(-10)">-10s</button>
         <button onclick="seek(-5)">-5s</button>
-        
         <button id="btn-play" onclick="togglePlay()">REPRODUCIR</button>
-        
         <button onclick="seek(5)">+5s</button>
         <button onclick="seek(10)">+10s</button>
         <button onclick="reiniciar()">REINICIAR</button>
     </div>
 
-    <script>
-        // Esta parte es necesaria para controlar YouTube vía API
+    <script type="module">
+        import { baseDeTemas } from './js/temas.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const idTema = params.get('id');
+        const tema = baseDeTemas[idTema];
+
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        let player;
+        window.player = null;
         let isYouTube = false;
         let playing = false;
         let inicioPredeterminado = 0;
 
-        // Simulamos la carga del tema (Aquí deberías conectar con tu temas.js)
-        const tema = { 
-            titulo: "Cajamarquina", 
-            artista: "Bandero Loco", 
-            tonalidad: "Si menor", 
-            videoId: "7353849040586542341", // Cambia esto por tu ID de prueba
-            inicio: 15, 
-            fuente: "youtube" // o "drive"
-        };
+        window.onYouTubeIframeAPIReady = function() {
+            if (!tema) {
+                document.getElementById('txt-titulo').innerText = "Tema no encontrado";
+                return;
+            }
 
-        function onYouTubeIframeAPIReady() {
             document.getElementById('txt-titulo').innerText = tema.titulo;
-            document.getElementById('txt-banda').innerText = tema.artista;
+            document.getElementById('txt-banda').innerText = tema.artista || "Banda Desconocida";
             document.getElementById('txt-tono').innerText = tema.tonalidad;
-            inicioPredeterminado = tema.inicio;
+            inicioPredeterminado = tema.inicio || 0;
 
-            if (tema.fuente === "youtube") {
+            if (tema.fuente === "youtube" && tema.videoId) {
                 isYouTube = true;
-                player = new YT.Player('player', {
+                window.player = new YT.Player('player', {
                     height: '100%',
                     width: '100%',
                     videoId: tema.videoId,
                     playerVars: { 
-                        'start': tema.inicio, 
+                        'start': inicioPredeterminado, 
                         'controls': 0, 
                         'disablekb': 1, 
-                        'rel': 0 
+                        'rel': 0,
+                        'modestbranding': 1
                     },
                     events: { 'onStateChange': onPlayerStateChange }
                 });
-            } else {
-                // Modo Drive
+            } else if (tema.fuente === "drive" && tema.videoId) {
                 isYouTube = false;
                 document.getElementById('player').innerHTML = `
-                    <iframe id="drive-iframe" src="https://drive.google.com/file/d/${tema.videoId}/preview"></iframe>
+                    <iframe id="drive-iframe" src="https://drive.google.com/file/d/${tema.videoId}/preview" allow="autoplay"></iframe>
                 `;
             }
-        }
+        };
 
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play');
@@ -136,30 +86,26 @@
             }
         }
 
-        function togglePlay() {
-            if (isYouTube) {
-                if (playing) { player.pauseVideo(); } 
-                else { player.playVideo(); }
-            } else {
-                // Drive no permite toggle real por seguridad de iframe, 
-                // el usuario deberá usar el play nativo del centro de drive la primera vez.
-                alert("Para videos de Drive, usa el botón central del video.");
+        window.togglePlay = function() {
+            if (isYouTube && window.player) {
+                if (playing) { window.player.pauseVideo(); } 
+                else { window.player.playVideo(); }
             }
-        }
+        };
 
-        function seek(segundos) {
-            if (isYouTube) {
-                let tiempoActual = player.getCurrentTime();
-                player.seekTo(tiempoActual + segundos, true);
+        window.seek = function(segundos) {
+            if (isYouTube && window.player) {
+                let tiempoActual = window.player.getCurrentTime();
+                window.player.seekTo(tiempoActual + segundos, true);
             }
-        }
+        };
 
-        function reiniciar() {
-            if (isYouTube) {
-                player.seekTo(inicioPredeterminado, true);
-                player.playVideo();
+        window.reiniciar = function() {
+            if (isYouTube && window.player) {
+                window.player.seekTo(inicioPredeterminado, true);
+                window.player.playVideo();
             }
-        }
+        };
     </script>
 </body>
 </html>
