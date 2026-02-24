@@ -235,6 +235,7 @@
         window.onYouTubeIframeAPIReady = function() {
             if (!tema) return;
 
+            // Llenamos los datos del encabezado
             document.getElementById('txt-titulo').innerText = tema.titulo;
             document.getElementById('txt-banda').innerText = tema.artista;
             document.getElementById('txt-tono').innerText = tema.tonalidad;
@@ -242,14 +243,16 @@
 
             const panel = document.getElementById('panel-controles');
             const aviso = document.getElementById('aviso-drive');
-            const cTotal = document.getElementById('capa-bloqueo-total');
-            const cDrive = document.getElementById('capa-bloqueo-drive');
+            const cTotal = document.getElementById('capa-bloqueo-total'); // Vidrio de YouTube
+            const cDrive = document.getElementById('capa-bloqueo-drive'); // Bloqueo de Drive
 
             if (tema.fuente === "youtube") {
                 isYouTube = true;
                 panel.style.display = 'flex';
                 aviso.style.display = 'none';
-                cTotal.style.display = 'block';
+                
+                // ACTIVAMOS EL VIDRIO TRANSPARENTE AQUÍ
+                cTotal.style.display = 'block'; 
                 cDrive.style.display = 'none';
 
                 window.player = new YT.Player('player', {
@@ -265,11 +268,12 @@
                     }
                 });
             } else {
+                // Lógica para Google Drive
                 isYouTube = false;
                 panel.style.display = 'none';
                 aviso.style.display = 'block';
-                cTotal.style.display = 'none';
-                cDrive.style.display = 'block';
+                cTotal.style.display = 'none'; // En Drive no necesitamos el vidrio total
+                cDrive.style.display = 'block'; // Solo bloqueamos la esquina
 
                 const iframeDrive = document.createElement('iframe');
                 iframeDrive.src = `https://drive.google.com/file/d/${tema.videoId}/preview`;

@@ -174,10 +174,16 @@ nav {
     top: -10%; left: -2%; width: 104%; height: 120%;
 }
 
-.capa-blindada {
+.capa-full {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20; /* Siempre por encima del video */
+    background: rgba(0,0,0,0); 
+    display: none; /* Se activará solo si es YouTube */
+    cursor: default !important;
 }
 
 .info-huayno {
