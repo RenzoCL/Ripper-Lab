@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Ripper</title>
+    <title>Reproductor Ripper - Pro</title>
     <style>
         :root {
             --primary: #ff0000;
             --bg: #0f0f0f;
-            --card: #1e1e1e;
+            --card: #1a1a1a;
             --text: #ffffff;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -23,88 +23,151 @@
             padding: 20px;
         }
 
-        .header-info { text-align: center; margin-bottom: 20px; }
-        .header-info h1 { color: var(--primary); margin: 5px 0; }
+        /* Botón Volver */
+        .btn-volver {
+            align-self: flex-start;
+            background: none;
+            border: 1px solid #333;
+            color: #888;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .btn-volver:hover { color: white; border-color: white; }
 
-        /* Contenedor del Video */
+        .header-info { text-align: center; margin-bottom: 20px; }
+        .header-info h1 { color: var(--primary); margin: 5px 0; font-size: 1.6rem; }
+        .header-info p { margin: 2px 0; opacity: 0.8; }
+
+        /* CONTENEDOR DE VIDEO DINÁMICO */
         #video-container {
             width: 100%;
             max-width: 640px;
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 16 / 9; /* Mantiene la forma siempre */
             background: #000;
             position: relative;
-            border-radius: 12px;
+            border-radius: 15px;
             overflow: hidden;
-            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         /* CAPAS DE BLOQUEO */
-        .capa-youtube {
+        .capa-full {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; display: none; cursor: default;
+            z-index: 10; display: none;
         }
-        .capa-drive-esquina {
-            position: absolute; top: 0; right: 0; width: 20%; height: 20%;
+        .capa-esquina-drive {
+            position: absolute; top: 0; right: 0; width: 80px; height: 60px;
             z-index: 10; display: none; background: rgba(0,0,0,0);
         }
 
-        iframe { width: 100%; height: 100%; border: none; }
+        /* Ajuste para que Drive o YouTube ocupen TODO el alto */
+        #player, iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+            display: block;
+        }
 
-        /* PANEL DE CONTROLES */
+        /* PANEL DE CONTROLES YOUTUBE */
         .controles-panel {
             background: var(--card);
-            padding: 20px;
-            border-radius: 0 0 12px 12px;
+            padding: 25px;
+            border-radius: 0 0 15px 15px;
             width: 100%;
-            max-width: 600px;
+            max-width: 590px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
+            border: 1px solid #222;
         }
 
-        .botones-row { display: flex; gap: 10px; align-items: center; }
+        .botones-row { display: flex; gap: 15px; align-items: center; }
 
-        button {
-            background: #333; border: none; color: white;
-            padding: 10px 15px; border-radius: 5px; cursor: pointer;
+        /* BOTÓN CIRCULAR */
+        #btn-play {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.7rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #btn-play:hover { transform: scale(1.1); background: #ff3333; }
+
+        .btn-salto {
+            background: #252525;
+            border: 1px solid #333;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-salto:hover { background: #444; }
+
+        .btn-reiniciar {
+            background: transparent;
+            color: #888;
+            border: 1px solid #444;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-transform: uppercase;
         }
 
-        #btn-play { background: var(--primary); font-weight: bold; width: 80px; }
-
-        #aviso-drive { font-size: 0.8rem; color: #888; display: none; }
-        
-        .btn-volver { margin-bottom: 20px; align-self: flex-start; background: none; color: var(--primary); }
+        #aviso-drive {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #666;
+            display: none;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <button class="btn-volver" onclick="window.history.back()">← Volver a la lista</button>
+    <button class="btn-volver" onclick="window.history.back()">← Volver</button>
 
     <div class="header-info">
         <h1 id="txt-titulo">Cargando...</h1>
-        <p id="txt-banda"></p>
-        <p>Tono: <span id="txt-tono"></span></p>
+        <p id="txt-banda">--</p>
+        <p>Tonalidad: <b id="txt-tono">--</b></p>
     </div>
 
     <div id="video-container">
-        <div id="capa-full" class="capa-youtube"></div>
-        <div id="capa-esquina" class="capa-drive-esquina"></div>
+        <div id="capa-bloqueo-total" class="capa-full"></div>
+        <div id="capa-bloqueo-drive" class="capa-esquina-drive"></div>
         <div id="player"></div>
     </div>
 
     <div id="panel-controles" class="controles-panel">
         <div class="botones-row">
-            <button onclick="seek(-10)">-10s</button>
-            <button onclick="seek(-5)">-5s</button>
+            <button class="btn-salto" onclick="seek(-10)">-10s</button>
+            <button class="btn-salto" onclick="seek(-5)">-5s</button>
+            
             <button id="btn-play" onclick="togglePlay()">PLAY</button>
-            <button onclick="seek(5)">+5s</button>
-            <button onclick="seek(10)">+10s</button>
+            
+            <button class="btn-salto" onclick="seek(5)">+5s</button>
+            <button class="btn-salto" onclick="seek(10)">+10s</button>
         </div>
-        <button onclick="reiniciar()">Reiniciar canción</button>
+        <button class="btn-reiniciar" onclick="reiniciar()">Reiniciar Marca</button>
     </div>
 
-    <p id="aviso-drive">Usa los controles del video para reproducir y adelantar.</p>
+    <p id="aviso-drive">ℹ️ Usa los controles de la pantalla para este video.</p>
 
     <script type="module">
         import { baseDeTemas } from './js/temas.js';
@@ -113,7 +176,6 @@
         const idTema = params.get('id');
         const tema = baseDeTemas[idTema];
 
-        // Cargar API de YouTube
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -132,25 +194,39 @@
             document.getElementById('txt-tono').innerText = tema.tonalidad;
             inicioPredeterminado = tema.inicio || 0;
 
+            const panel = document.getElementById('panel-controles');
+            const aviso = document.getElementById('aviso-drive');
+            const cTotal = document.getElementById('capa-bloqueo-total');
+            const cDrive = document.getElementById('capa-bloqueo-drive');
+
             if (tema.fuente === "youtube") {
                 isYouTube = true;
-                document.getElementById('capa-full').style.display = 'block';
-                document.getElementById('panel-controles').style.display = 'flex';
-                
+                panel.style.display = 'flex';
+                aviso.style.display = 'none';
+                cTotal.style.display = 'block';
+                cDrive.style.display = 'none';
+
                 window.player = new YT.Player('player', {
                     height: '100%', width: '100%',
                     videoId: tema.videoId,
-                    playerVars: { 'start': inicioPredeterminado, 'controls': 0, 'disablekb': 1, 'rel': 0 },
+                    playerVars: { 
+                        'start': inicioPredeterminado, 
+                        'controls': 0, 'disablekb': 1, 'rel': 0, 'modestbranding': 1 
+                    },
                     events: { 'onStateChange': onPlayerStateChange }
                 });
             } else {
                 isYouTube = false;
-                document.getElementById('capa-esquina').style.display = 'block';
-                document.getElementById('panel-controles').style.display = 'none';
-                document.getElementById('aviso-drive').style.display = 'block';
-                
+                panel.style.display = 'none';
+                aviso.style.display = 'block';
+                cTotal.style.display = 'none';
+                cDrive.style.display = 'block';
+
                 document.getElementById('player').innerHTML = `
-                    <iframe src="https://drive.google.com/file/d/${tema.videoId}/preview" allow="autoplay"></iframe>
+                    <iframe src="https://drive.google.com/file/d/${tema.videoId}/preview" 
+                            allow="autoplay" 
+                            style="width:100%; height:100%; position:absolute; top:0; left:0;">
+                    </iframe>
                 `;
             }
         };
