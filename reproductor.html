@@ -189,7 +189,7 @@
 
         <div id="aviso-play-pantalla" onclick="togglePlay()">
             <p style="font-weight: bold; font-size: 1.1rem; margin: 0;">PRESIONA EL BOTÓN ROJO</p>
-            <p style="font-size: 0.9rem; opacity: 0.8;">para iniciar la clase</p>
+            <p style="font-size: 0.9rem; opacity: 0.8;">para iniciar el video</p>
             <div class="flecha-animada">↓</div>
         </div>
 
@@ -308,8 +308,13 @@
 
         window.togglePlay = function() {
             if (isYouTube && window.player) {
-                if (playing) window.player.pauseVideo();
-                else window.player.playVideo();
+                if (playing) {
+                    window.player.pauseVideo();
+                } else {
+                    // OCULTAR EL AVISO AL INSTANTE AL DAR CLICK
+                    document.getElementById('aviso-play-pantalla').style.display = 'none';
+                    window.player.playVideo();
+                }
             }
         };
 
