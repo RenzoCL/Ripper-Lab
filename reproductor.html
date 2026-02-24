@@ -1,27 +1,194 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ripper - Player</title>
+    <style>
+        :root {
+            --primary: #ff0000;
+            --bg: #0f0f0f;
+            --card: #1e1e1e;
+            --text: #ffffff;
+            --text-dim: #aaaaaa;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Información del tema */
+        .header-info {
+            text-align: center;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 640px;
+        }
+
+        .header-info h1 {
+            font-size: 1.8rem;
+            margin: 0 0 5px 0;
+            color: var(--primary);
+        }
+
+        .header-info .artista {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin: 0;
+        }
+
+        .header-info .badge-tono {
+            display: inline-block;
+            background: #333;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            border: 1px solid #444;
+        }
+
+        /* Contenedor del video (Tamaño fijo controlado) */
+        #video-container {
+            width: 100%;
+            max-width: 640px; /* Tamaño máximo para que no se estire feo */
+            aspect-ratio: 16 / 9;
+            background: #000;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        /* Capa transparente solo para YouTube */
+        .capa-bloqueo {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5;
+            display: none; /* Se activa por JS solo en YouTube */
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Panel de Controles Moderno */
+        .controles-panel {
+            background: var(--card);
+            margin-top: -15px; /* Sube un poco para unirse visualmente */
+            padding: 30px 20px 20px;
+            border-radius: 0 0 12px 12px;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .botones-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid #444;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Botón Play Central */
+        #btn-play {
+            background: var(--primary);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.7rem;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        #btn-play:hover {
+            transform: scale(1.1);
+            background: #ff3333;
+        }
+
+        /* Botones de salto */
+        .btn-jump {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+        }
+
+        .btn-jump:hover {
+            background: #333;
+            border-color: var(--primary);
+        }
+
+        .btn-reiniciar {
+            margin-top: 15px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Aviso para Drive */
+        #aviso-drive {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: #666;
+            display: none;
+        }
+
+    </style>
+</head>
 <body>
 
     <div class="header-info">
-        <h1 id="txt-titulo"></h1>
-        <p id="txt-banda"></p>
-        <p>Tonalidad: <b id="txt-tono"></b></p>
+        <h1 id="txt-titulo">Cargando canción...</h1>
+        <p class="artista" id="txt-banda">--</p>
+        <div class="badge-tono">Tono: <span id="txt-tono">--</span></div>
     </div>
 
-    <div id="video-frame">
-        <div class="capa-bloqueo"></div>
-        <div id="player"></div> 
+    <div id="video-container">
+        <div id="capa" class="capa-bloqueo"></div>
+        <div id="player"></div>
     </div>
 
-    <div class="controles">
-        <button onclick="seek(-10)">-10s</button>
-        <button onclick="seek(-5)">-5s</button>
-        <button id="btn-play" onclick="togglePlay()">REPRODUCIR</button>
-        <button onclick="seek(5)">+5s</button>
-        <button onclick="seek(10)">+10s</button>
-        <button onclick="reiniciar()">REINICIAR</button>
+    <div class="controles-panel">
+        <div class="botones-row">
+            <button class="btn-jump" onclick="seek(-10)">-10s</button>
+            <button class="btn-jump" onclick="seek(-5)">-5s</button>
+            
+            <button id="btn-play" onclick="togglePlay()">PLAY</button>
+            
+            <button class="btn-jump" onclick="seek(5)">+5s</button>
+            <button class="btn-jump" onclick="seek(10)">+10s</button>
+        </div>
+        <button class="btn-reiniciar" onclick="reiniciar()">Reiniciar desde marca</button>
+        <p id="aviso-drive">Nota: En Drive usa los controles internos del video.</p>
     </div>
 
     <script type="module">
@@ -31,6 +198,7 @@
         const idTema = params.get('id');
         const tema = baseDeTemas[idTema];
 
+        // Cargar API de YouTube
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -42,18 +210,16 @@
         let inicioPredeterminado = 0;
 
         window.onYouTubeIframeAPIReady = function() {
-            if (!tema) {
-                document.getElementById('txt-titulo').innerText = "Tema no encontrado";
-                return;
-            }
+            if (!tema) return;
 
             document.getElementById('txt-titulo').innerText = tema.titulo;
-            document.getElementById('txt-banda').innerText = tema.artista || "Banda Desconocida";
+            document.getElementById('txt-banda').innerText = tema.artista;
             document.getElementById('txt-tono').innerText = tema.tonalidad;
             inicioPredeterminado = tema.inicio || 0;
 
-            if (tema.fuente === "youtube" && tema.videoId) {
+            if (tema.fuente === "youtube") {
                 isYouTube = true;
+                document.getElementById('capa').style.display = 'block';
                 window.player = new YT.Player('player', {
                     height: '100%',
                     width: '100%',
@@ -67,10 +233,13 @@
                     },
                     events: { 'onStateChange': onPlayerStateChange }
                 });
-            } else if (tema.fuente === "drive" && tema.videoId) {
+            } else {
+                // Modo Drive
                 isYouTube = false;
+                document.getElementById('aviso-drive').style.display = 'block';
+                document.getElementById('btn-play').style.opacity = '0.3';
                 document.getElementById('player').innerHTML = `
-                    <iframe id="drive-iframe" src="https://drive.google.com/file/d/${tema.videoId}/preview" allow="autoplay"></iframe>
+                    <iframe id="drive-iframe" src="https://drive.google.com/file/d/${tema.videoId}/preview"></iframe>
                 `;
             }
         };
@@ -78,34 +247,33 @@
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play');
             if (event.data == YT.PlayerState.PLAYING) {
-                btn.innerText = "PAUSAR";
+                btn.innerText = "PAUSA";
                 playing = true;
             } else {
-                btn.innerText = "REPRODUCIR";
+                btn.innerText = "PLAY";
                 playing = false;
             }
         }
 
         window.togglePlay = function() {
             if (isYouTube && window.player) {
-                if (playing) { window.player.pauseVideo(); } 
-                else { window.player.playVideo(); }
+                if (playing) window.player.pauseVideo();
+                else window.player.playVideo();
             }
-        };
+        }
 
-        window.seek = function(segundos) {
+        window.seek = function(seg) {
             if (isYouTube && window.player) {
-                let tiempoActual = window.player.getCurrentTime();
-                window.player.seekTo(tiempoActual + segundos, true);
+                window.player.seekTo(window.player.getCurrentTime() + seg, true);
             }
-        };
+        }
 
         window.reiniciar = function() {
             if (isYouTube && window.player) {
                 window.player.seekTo(inicioPredeterminado, true);
                 window.player.playVideo();
             }
-        };
+        }
     </script>
 </body>
 </html>
