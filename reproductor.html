@@ -3,193 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ripper - Player</title>
+    <title>Reproductor Ripper</title>
     <style>
         :root {
             --primary: #ff0000;
             --bg: #0f0f0f;
             --card: #1e1e1e;
             --text: #ffffff;
-            --text-dim: #aaaaaa;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
 
-        /* Información del tema */
-        .header-info {
-            text-align: center;
-            margin-bottom: 25px;
-            width: 100%;
-            max-width: 640px;
-        }
+        .header-info { text-align: center; margin-bottom: 20px; }
+        .header-info h1 { color: var(--primary); margin: 5px 0; }
 
-        .header-info h1 {
-            font-size: 1.8rem;
-            margin: 0 0 5px 0;
-            color: var(--primary);
-        }
-
-        .header-info .artista {
-            font-size: 1.1rem;
-            color: var(--text-dim);
-            margin: 0;
-        }
-
-        .header-info .badge-tono {
-            display: inline-block;
-            background: #333;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            border: 1px solid #444;
-        }
-
-        /* Contenedor del video (Tamaño fijo controlado) */
+        /* Contenedor del Video */
         #video-container {
             width: 100%;
-            max-width: 640px; /* Tamaño máximo para que no se estire feo */
+            max-width: 640px;
             aspect-ratio: 16 / 9;
             background: #000;
             position: relative;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border: 1px solid #333;
         }
 
-        /* Capa transparente solo para YouTube */
-        .capa-bloqueo {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 5;
-            display: none; /* Se activa por JS solo en YouTube */
+        /* CAPAS DE BLOQUEO */
+        .capa-youtube {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; display: none; cursor: default;
+        }
+        .capa-drive-esquina {
+            position: absolute; top: 0; right: 0; width: 20%; height: 20%;
+            z-index: 10; display: none; background: rgba(0,0,0,0);
         }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        /* Panel de Controles Moderno */
+        /* PANEL DE CONTROLES */
         .controles-panel {
             background: var(--card);
-            margin-top: -15px; /* Sube un poco para unirse visualmente */
-            padding: 30px 20px 20px;
+            padding: 20px;
             border-radius: 0 0 12px 12px;
             width: 100%;
             max-width: 600px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            z-index: 2;
+            gap: 15px;
         }
 
-        .botones-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
-        }
+        .botones-row { display: flex; gap: 10px; align-items: center; }
 
         button {
-            background: transparent;
-            border: 1px solid #444;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #333; border: none; color: white;
+            padding: 10px 15px; border-radius: 5px; cursor: pointer;
         }
 
-        /* Botón Play Central */
-        #btn-play {
-            background: var(--primary);
-            border: none;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 0.7rem;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
-        }
+        #btn-play { background: var(--primary); font-weight: bold; width: 80px; }
 
-        #btn-play:hover {
-            transform: scale(1.1);
-            background: #ff3333;
-        }
-
-        /* Botones de salto */
-        .btn-jump {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            font-size: 0.8rem;
-        }
-
-        .btn-jump:hover {
-            background: #333;
-            border-color: var(--primary);
-        }
-
-        .btn-reiniciar {
-            margin-top: 15px;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Aviso para Drive */
-        #aviso-drive {
-            margin-top: 10px;
-            font-size: 0.75rem;
-            color: #666;
-            display: none;
-        }
-
+        #aviso-drive { font-size: 0.8rem; color: #888; display: none; }
+        
+        .btn-volver { margin-bottom: 20px; align-self: flex-start; background: none; color: var(--primary); }
     </style>
 </head>
 <body>
 
+    <button class="btn-volver" onclick="window.history.back()">← Volver a la lista</button>
+
     <div class="header-info">
-        <h1 id="txt-titulo">Cargando canción...</h1>
-        <p class="artista" id="txt-banda">--</p>
-        <div class="badge-tono">Tono: <span id="txt-tono">--</span></div>
+        <h1 id="txt-titulo">Cargando...</h1>
+        <p id="txt-banda"></p>
+        <p>Tono: <span id="txt-tono"></span></p>
     </div>
 
     <div id="video-container">
-        <div id="capa" class="capa-bloqueo"></div>
+        <div id="capa-full" class="capa-youtube"></div>
+        <div id="capa-esquina" class="capa-drive-esquina"></div>
         <div id="player"></div>
     </div>
 
-    <div class="controles-panel">
+    <div id="panel-controles" class="controles-panel">
         <div class="botones-row">
-            <button class="btn-jump" onclick="seek(-10)">-10s</button>
-            <button class="btn-jump" onclick="seek(-5)">-5s</button>
-            
+            <button onclick="seek(-10)">-10s</button>
+            <button onclick="seek(-5)">-5s</button>
             <button id="btn-play" onclick="togglePlay()">PLAY</button>
-            
-            <button class="btn-jump" onclick="seek(5)">+5s</button>
-            <button class="btn-jump" onclick="seek(10)">+10s</button>
+            <button onclick="seek(5)">+5s</button>
+            <button onclick="seek(10)">+10s</button>
         </div>
-        <button class="btn-reiniciar" onclick="reiniciar()">Reiniciar desde marca</button>
-        <p id="aviso-drive">Nota: En Drive usa los controles internos del video.</p>
+        <button onclick="reiniciar()">Reiniciar canción</button>
     </div>
+
+    <p id="aviso-drive">Usa los controles del video para reproducir y adelantar.</p>
 
     <script type="module">
         import { baseDeTemas } from './js/temas.js';
@@ -219,27 +134,23 @@
 
             if (tema.fuente === "youtube") {
                 isYouTube = true;
-                document.getElementById('capa').style.display = 'block';
+                document.getElementById('capa-full').style.display = 'block';
+                document.getElementById('panel-controles').style.display = 'flex';
+                
                 window.player = new YT.Player('player', {
-                    height: '100%',
-                    width: '100%',
+                    height: '100%', width: '100%',
                     videoId: tema.videoId,
-                    playerVars: { 
-                        'start': inicioPredeterminado, 
-                        'controls': 0, 
-                        'disablekb': 1, 
-                        'rel': 0,
-                        'modestbranding': 1
-                    },
+                    playerVars: { 'start': inicioPredeterminado, 'controls': 0, 'disablekb': 1, 'rel': 0 },
                     events: { 'onStateChange': onPlayerStateChange }
                 });
             } else {
-                // Modo Drive
                 isYouTube = false;
+                document.getElementById('capa-esquina').style.display = 'block';
+                document.getElementById('panel-controles').style.display = 'none';
                 document.getElementById('aviso-drive').style.display = 'block';
-                document.getElementById('btn-play').style.opacity = '0.3';
+                
                 document.getElementById('player').innerHTML = `
-                    <iframe id="drive-iframe" src="https://drive.google.com/file/d/${tema.videoId}/preview"></iframe>
+                    <iframe src="https://drive.google.com/file/d/${tema.videoId}/preview" allow="autoplay"></iframe>
                 `;
             }
         };
@@ -260,20 +171,20 @@
                 if (playing) window.player.pauseVideo();
                 else window.player.playVideo();
             }
-        }
+        };
 
         window.seek = function(seg) {
             if (isYouTube && window.player) {
                 window.player.seekTo(window.player.getCurrentTime() + seg, true);
             }
-        }
+        };
 
         window.reiniciar = function() {
             if (isYouTube && window.player) {
                 window.player.seekTo(inicioPredeterminado, true);
                 window.player.playVideo();
             }
-        }
+        };
     </script>
 </body>
 </html>
