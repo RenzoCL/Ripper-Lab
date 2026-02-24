@@ -229,6 +229,7 @@
         let isYouTube = false;
         let playing = false;
         let inicioPresionado = false; // Nueva variable para evitar el parpadeo
+        let timerCarga; // Variable para controlar el retraso del spinner
         let inicioPredeterminado = 0;
 
         window.onYouTubeIframeAPIReady = function() {
@@ -297,22 +298,32 @@
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.innerText = "PAUSA";
                 playing = true;
-                avisoPlay.style.display = 'none'; // Aseguramos que se oculte
+                avisoPlay.style.display = 'none';
+                
+                // Si el video empieza a jugar, cancelamos cualquier spinner pendiente
+                clearTimeout(timerCarga);
+                document.getElementById('loading-screen').style.display = 'none';
             } else {
                 btn.innerText = "PLAY";
                 playing = false;
-                
-                // SOLO mostrar el aviso si NO se ha presionado play antes
                 if (!inicioPresionado) {
                     avisoPlay.style.display = 'flex';
                 }
             }
 
-            // El loading screen solo aparece si está cargando a mitad del video
+            // --- LÓGICA INTELIGENTE PARA EL SPINNER ---
             if (event.data == YT.PlayerState.BUFFERING) {
-                document.getElementById('loading-screen').style.display = 'flex';
+                // Esperamos medio segundo antes de mostrar el spinner
+                timerCarga = setTimeout(() => {
+                    document.getElementById('loading-screen').style.display = 'flex';
+                }, 500); 
             } else {
-                document.getElementById('loading-screen').style.display = 'none';
+                // Si sale de buffering antes de los 500ms, el spinner nunca se muestra
+                clearTimeout(timerCarga);
+                // Solo lo ocultamos si no estamos en el proceso de carga inicial
+                if (event.data !== YT.PlayerState.UNSTARTED) {
+                    document.getElementById('loading-screen').style.display = 'none';
+                }
             }
         }
 
