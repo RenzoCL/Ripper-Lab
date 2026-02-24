@@ -48,7 +48,7 @@ export const baseDeTemas = {
     "46": { titulo: "Yo Nací Solo Para Ti",         artista: "Banda Centro Musical Pomapata",               tonalidad: "Mi menor", videoId: "iGo-vGi5L8g", inicio: 15, categoria: "huayno", fuente: "youtube" },
     "47": { titulo: "Ábreme La Puerta",             artista: "Banda Orquesta Corazón de Huandoval",         tonalidad: "Re menor", videoId: "xlhYg7bhJ74", inicio: 22, categoria: "huayno", fuente: "youtube" },
     "48": { titulo: "Amor Por Internet",            artista: "Centro Musical Pomapata",                     tonalidad: "Re menor", videoId: "D1FLQnE9wnM", inicio: 46, categoria: "huayno", fuente: "youtube" },
-    "49": { titulo: "Cajamarquina",                 artista: "Banda Orquesta Social Huancaya (BOSH)",       tonalidad: "Re menor", videoId: "1FUprBcWk4IJwjJtej2Rz3iWMUKwZOyK7", inicio: 0, categoria: "huayno", fuente: "drive" },
+    "49": { titulo: "Cajamarquina",                 artista: "Banda Orquesta Social Huancaya (BOSH)",       tonalidad: "Re menor", videoId: "1FUprBcWk4IJwjJtej2Rz3iWMUKwZOyK7", inicio: 23, categoria: "huayno", fuente: "drive" },
     "50": { titulo: "Capitalina",                   artista: "Banda Orquesta Corazón de Huandoval",         tonalidad: "Re menor", videoId: "A8LRNb7pz8E", inicio: 23, categoria: "huayno", fuente: "youtube" },
     "51": { titulo: "Como Duele el Corazón",        artista: "Banda Show La Huaranchal",                    tonalidad: "Re menor", videoId: "gJ7axr_iHqM", inicio: 347, categoria: "huayno", fuente: "youtube" },
     "52": { titulo: "El Coche de su Madre",         artista: "Banda Show La Huaranchal",                    tonalidad: "Re menor", videoId: "Ulqak7ViLb0", inicio: 111, categoria: "huayno", fuente: "youtube" },
