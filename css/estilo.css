@@ -174,27 +174,30 @@ nav {
     top: -10%; left: -2%; width: 104%; height: 120%;
 }
 
+/* 1. Hacemos que el reproductor NO reaccione al mouse */
+#player {
+    pointer-events: none !important;
+    z-index: 1;
+}
+
+/* 2. Blindamos la capa transparente */
 .capa-full {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    /* Subimos el nivel a 99 para que sea impenetrable */
-    z-index: 99 !important; 
-    background: rgba(0, 0, 0, 0); /* Invisible */
-    display: none; /* Se activa con tu JS */
-    cursor: default !important;
+    z-index: 999 !important; /* Un número masivo para asegurar el frente */
+    background: rgba(0, 0, 0, 0); 
+    display: none;
+    cursor: default;
+    /* Esta capa SÍ recibe eventos, bloqueando el paso al video */
+    pointer-events: auto !important; 
 }
 
-/* IMPORTANTE: Los avisos deben estar aún más arriba para poder clickearlos */
-#aviso-play-pantalla {
-    z-index: 100 !important;
-}
-
-#loading-screen {
-    z-index: 101 !important;
-}
+/* 3. Subimos los avisos por encima del blindaje */
+#aviso-play-pantalla { z-index: 1000 !important; }
+#loading-screen { z-index: 1001 !important; }
 
 .info-huayno {
     background: #1a1a1a;
