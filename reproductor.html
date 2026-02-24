@@ -228,6 +228,7 @@
         window.player = null;
         let isYouTube = false;
         let playing = false;
+        let inicioPresionado = false; // Nueva variable para evitar el parpadeo
         let inicioPredeterminado = 0;
 
         window.onYouTubeIframeAPIReady = function() {
@@ -296,12 +297,18 @@
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.innerText = "PAUSA";
                 playing = true;
-                avisoPlay.style.display = 'none';
+                avisoPlay.style.display = 'none'; // Aseguramos que se oculte
             } else {
                 btn.innerText = "PLAY";
                 playing = false;
+                
+                // SOLO mostrar el aviso si NO se ha presionado play antes
+                if (!inicioPresionado) {
+                    avisoPlay.style.display = 'flex';
+                }
             }
 
+            // El loading screen solo aparece si está cargando a mitad del video
             if (event.data == YT.PlayerState.BUFFERING) {
                 document.getElementById('loading-screen').style.display = 'flex';
             } else {
@@ -314,7 +321,8 @@
                 if (playing) {
                     window.player.pauseVideo();
                 } else {
-                    // OCULTAR EL AVISO AL INSTANTE AL DAR CLICK
+                    // Marcamos que el usuario ya inició el video
+                    inicioPresionado = true; 
                     document.getElementById('aviso-play-pantalla').style.display = 'none';
                     window.player.playVideo();
                 }
@@ -329,6 +337,8 @@
 
         window.reiniciar = function() {
             if (isYouTube && window.player) {
+                inicioPresionado = true; // Evita que salte el aviso al reiniciar
+                document.getElementById('aviso-play-pantalla').style.display = 'none';
                 window.player.seekTo(inicioPredeterminado, true);
                 window.player.playVideo();
             }
