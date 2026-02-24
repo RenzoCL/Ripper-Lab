@@ -283,7 +283,10 @@
 
         function onPlayerReady(event) {
             document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('aviso-play-pantalla').style.display = 'flex';
+            // Solo mostrar si el video está pausado o recién cargado
+            if (window.player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                document.getElementById('aviso-play-pantalla').style.display = 'flex';
+            }
         }
 
         function onPlayerStateChange(event) {
