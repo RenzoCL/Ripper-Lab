@@ -180,10 +180,20 @@ nav {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 20; /* Siempre por encima del video */
-    background: rgba(0,0,0,0); 
-    display: none; /* Se activará solo si es YouTube */
+    /* Subimos el nivel a 99 para que sea impenetrable */
+    z-index: 99 !important; 
+    background: rgba(0, 0, 0, 0); /* Invisible */
+    display: none; /* Se activa con tu JS */
     cursor: default !important;
+}
+
+/* IMPORTANTE: Los avisos deben estar aún más arriba para poder clickearlos */
+#aviso-play-pantalla {
+    z-index: 100 !important;
+}
+
+#loading-screen {
+    z-index: 101 !important;
 }
 
 .info-huayno {
