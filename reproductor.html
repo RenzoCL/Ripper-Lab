@@ -45,7 +45,7 @@
         #video-container {
             width: 100%;
             max-width: 640px;
-            aspect-ratio: 16 / 9; /* Mantiene la forma siempre */
+            aspect-ratio: 16 / 9;
             background: #000;
             position: relative;
             border-radius: 15px;
@@ -53,7 +53,43 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* CAPAS DE BLOQUEO */
+        /* --- NUEVOS ESTILOS DE CARGA Y AVISO --- */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #aviso-play-pantalla {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 25;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+        }
+
+        .flecha-animada {
+            font-size: 2.5rem;
+            color: var(--primary);
+            animation: rebote 1s infinite;
+            margin-top: 15px;
+        }
+        @keyframes rebote {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(15px); }
+        }
+        /* -------------------------------------- */
+
         .capa-full {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10; display: none;
@@ -63,7 +99,6 @@
             z-index: 10; display: none; background: rgba(0,0,0,0);
         }
 
-        /* Ajuste para que Drive o YouTube ocupen TODO el alto */
         #player, iframe {
             width: 100% !important;
             height: 100% !important;
@@ -71,7 +106,6 @@
             display: block;
         }
 
-        /* PANEL DE CONTROLES YOUTUBE */
         .controles-panel {
             background: var(--card);
             padding: 25px;
@@ -87,7 +121,6 @@
 
         .botones-row { display: flex; gap: 15px; align-items: center; }
 
-        /* BOTÓN CIRCULAR */
         #btn-play {
             background: var(--primary);
             color: white;
@@ -149,6 +182,17 @@
     </div>
 
     <div id="video-container">
+        <div id="loading-screen" style="position:absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:30; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div class="spinner"></div>
+            <p style="margin-top:15px; font-size:0.9rem;">Preparando video...</p>
+        </div>
+
+        <div id="aviso-play-pantalla" onclick="togglePlay()">
+            <p style="font-weight: bold; font-size: 1.1rem; margin: 0;">PRESIONA EL BOTÓN ROJO</p>
+            <p style="font-size: 0.9rem; opacity: 0.8;">para iniciar la clase</p>
+            <div class="flecha-animada">↓</div>
+        </div>
+
         <div id="capa-bloqueo-total" class="capa-full"></div>
         <div id="capa-bloqueo-drive" class="capa-esquina-drive"></div>
         <div id="player"></div>
@@ -213,7 +257,10 @@
                         'start': inicioPredeterminado, 
                         'controls': 0, 'disablekb': 1, 'rel': 0, 'modestbranding': 1 
                     },
-                    events: { 'onStateChange': onPlayerStateChange }
+                    events: { 
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange 
+                    }
                 });
             } else {
                 isYouTube = false;
@@ -222,23 +269,40 @@
                 cTotal.style.display = 'none';
                 cDrive.style.display = 'block';
 
-                document.getElementById('player').innerHTML = `
-                    <iframe src="https://drive.google.com/file/d/${tema.videoId}/preview" 
-                            allow="autoplay" 
-                            style="width:100%; height:100%; position:absolute; top:0; left:0;">
-                    </iframe>
-                `;
+                const iframeDrive = document.createElement('iframe');
+                iframeDrive.src = `https://drive.google.com/file/d/${tema.videoId}/preview`;
+                iframeDrive.allow = "autoplay";
+                iframeDrive.style = "width:100%; height:100%; position:absolute; top:0; left:0; border:none;";
+                
+                iframeDrive.onload = function() {
+                    document.getElementById('loading-screen').style.display = 'none';
+                };
+                document.getElementById('player').appendChild(iframeDrive);
             }
         };
 
+        function onPlayerReady(event) {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('aviso-play-pantalla').style.display = 'flex';
+        }
+
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play');
+            const avisoPlay = document.getElementById('aviso-play-pantalla');
+            
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.innerText = "PAUSA";
                 playing = true;
+                avisoPlay.style.display = 'none';
             } else {
                 btn.innerText = "PLAY";
                 playing = false;
+            }
+
+            if (event.data == YT.PlayerState.BUFFERING) {
+                document.getElementById('loading-screen').style.display = 'flex';
+            } else {
+                document.getElementById('loading-screen').style.display = 'none';
             }
         }
 
