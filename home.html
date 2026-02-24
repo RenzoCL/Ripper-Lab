@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Academia</title>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+    <div id="home-wrapper">
+        <nav>
+            <span style="font-weight: bold; color: #e63946;">🎺 ACADEMIA PREMIUM</span>
+            <button id="btnLogOut" class="btn-nav btn-logout">Cerrar Sesión</button>
+        </nav>
+
+        <h2 style="padding: 20px 20px 0;">Mis Categorías</h2>
+        
+        <div class="grid-categorias">
+            <a href="lista-temas.html?cat=huayno" class="cat-card">
+                <img src="imagenes/huayno.webp"><span>Huaynos</span>
+            </a>
+            <a href="lista-temas.html?cat=salay" class="cat-card">
+                <img src="imagenes/salay.webp"><span>Salay</span>
+            </a>
+            <a href="lista-temas.html?cat=cumbia" class="cat-card">
+                <img src="imagenes/cumbia.webp"><span>Cumbias</span>
+            </a>
+            <a href="lista-temas.html?cat=metodos" class="cat-card">
+                <img src="imagenes/metodos.webp"><span>Métodos</span>
+            </a>
+            </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { vigilarSesion, globalLogout } from "./js/seguridad.js";
+
+        // Vigilancia activa en el Home
+        vigilarSesion(auth, db, "home-wrapper");
+
+        document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
+    </script>
+</body>
+</html>

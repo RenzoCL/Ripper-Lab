@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorar Temas - Ripper</title>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+    <div id="lista-wrapper">
+        <nav>
+            <a href="home.html" class="btn-nav">⬅ Volver</a>
+            <h2 id="titulo-cat" style="margin:0; text-transform: uppercase; font-size: 1.1rem;">---</h2>
+        </nav>
+
+        <div class="container">
+            <input type="text" id="buscador" class="buscador" placeholder="🔎 Buscar por título o artista...">
+            <div id="lista" class="grid-huaynos"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { baseDeTemas } from "./js/temas.js";
+        import { vigilarSesion } from "./js/seguridad.js";
+
+        // 1. Vigilancia activa
+        vigilarSesion(auth, db, "lista-wrapper");
+
+        // 2. Parámetros de URL
+        const params = new URLSearchParams(window.location.search);
+        const catActual = params.get('cat') || 'huayno';
+        document.getElementById("titulo-cat").innerText = catActual;
+
+        const listaDiv = document.getElementById("lista");
+        const buscador = document.getElementById("buscador");
+
+        const normalizarTexto = (texto) => {
+            return texto ? texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+        };
+
+        function render(filtro = "") {
+            if (!listaDiv || !baseDeTemas) return;
+            listaDiv.innerHTML = "";
+
+            const ordenNotas = { "do": 1, "re": 2, "mi": 3, "fa": 4, "sol": 5, "la": 6, "si": 7 };
+            const textoBusqueda = normalizarTexto(filtro);
+
+            // Convertimos el objeto en Array y filtramos
+            const temasFiltrados = Object.keys(baseDeTemas)
+                .map(id => ({ id, ...baseDeTemas[id] }))
+                .filter(t => t.categoria === catActual)
+                .filter(t => {
+                    const titulo = normalizarTexto(t.titulo);
+                    const artista = normalizarTexto(t.artista);
+                    return titulo.includes(textoBusqueda) || artista.includes(textoBusqueda);
+                })
+                .sort((a, b) => {
+                    // Extraemos la primera palabra de la tonalidad (ej: "Re")
+                    const notaA = a.tonalidad.toLowerCase().split(" ")[0];
+                    const notaB = b.tonalidad.toLowerCase().split(" ")[0];
+                    
+                    const modoA = a.tonalidad.toLowerCase().includes("menor") ? "menor" : "mayor";
+                    const modoB = b.tonalidad.toLowerCase().includes("menor") ? "menor" : "mayor";
+
+                    // Prioridad 1: Nota musical
+                    if (ordenNotas[notaA] !== ordenNotas[notaB]) {
+                        return (ordenNotas[notaA] || 99) - (ordenNotas[notaB] || 99);
+                    }
+                    // Prioridad 2: Mayor antes que Menor
+                    if (modoA !== modoB) {
+                        return modoA === "mayor" ? -1 : 1; 
+                    }
+                    // Prioridad 3: Alfabeto
+                    return a.titulo.localeCompare(b.titulo);
+                });
+
+            if (temasFiltrados.length === 0) {
+                listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#666; padding:50px;">
+                    No hay temas en esta categoría o no coinciden con la búsqueda.</p>`;
+                return;
+            }
+
+            temasFiltrados.forEach(t => {
+                const card = document.createElement("a");
+                card.href = `reproductor.html?id=${t.id}`;
+                const claseColor = t.tonalidad.toLowerCase().trim().replace(/\s+/g, '-');
+                card.className = `card ${claseColor}`;
+                card.innerHTML = `
+                    <div style="display:flex; flex-direction:column;">
+                        <span class="titulo">${t.titulo}</span>
+                        <span style="font-size:0.7rem; color:#888;">${t.artista}</span>
+                    </div>
+                    <span class="tono-tag">${t.tonalidad}</span>
+                `;
+                listaDiv.appendChild(card);
+            });
+        }
+
+        // 3. Evento del buscador
+        buscador.addEventListener("input", (e) => render(e.target.value));
+
+        // 4. Ejecución inicial con un mini retraso para asegurar que baseDeTemas cargó
+        setTimeout(() => {
+            render();
+        }, 100);
+
+    </script>
+</body>
+</html>
