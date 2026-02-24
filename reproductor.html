@@ -3,72 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor - Academia</title>
-    <link rel="stylesheet" href="css/estilo.css">
+    <title>Reproductor - Ripper</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <style>
+        /* Estilos básicos para asegurar que el video se vea bien */
+        #contenedor-video {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .info-tema {
+            padding: 15px;
+            color: white;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
-    <div id="reproductor-wrapper">
-        <nav>
-            <button id="btnVolver" class="btn-nav">⬅ Atrás</button>
-            <button id="btnLogOut" class="btn-nav btn-logout">Cerrar Sesión</button>
-        </nav>
 
-        <div class="container">
-            <div class="video-wrapper">
-                <div id="player"></div>
-                <div class="capa-blindada"></div>
-            </div>
+    <div class="container">
+        <header>
+            <button onclick="window.history.back()" style="background:none; border:none; color:red; cursor:pointer;">← Volver</button>
+            <h1 id="titulo-tema">Cargando...</h1>
+        </header>
 
-            <div id="info-section"></div>
+        <div id="contenedor-video">
+            <p style="color:white;">Cargando reproductor...</p>
+        </div>
 
-            <div class="controles">
-                <button class="btn-skip" onclick="saltar(-10)">-10s</button>
-                <button class="btn-play" id="playBtn" onclick="togglePlay()">Pausa</button>
-                <button class="btn-skip" onclick="saltar(10)">+10s</button>
-            </div>
+        <div class="info-tema">
+            <h3 id="artista-tema"></h3>
+            <p>Tonalidad: <span id="tono-tema"></span></p>
         </div>
     </div>
 
     <script type="module">
-        import { auth, db } from "./firebase.js";
-        import { baseDeTemas } from "./js/temas.js";
-        import { vigilarSesion, globalLogout } from "./js/seguridad.js";
+        import { baseDeTemas } from './js/temas.js';
 
-        // Vigilancia activa en el Reproductor
-        vigilarSesion(auth, db, "reproductor-wrapper");
+        // 1. Obtener el ID del tema desde la URL (ej: reproductor.html?id=1)
+        const params = new URLSearchParams(window.location.search);
+        const idTema = params.get('id');
+        const tema = baseDeTemas[idTema];
 
-        const id = new URLSearchParams(window.location.search).get('id');
-        const tema = baseDeTemas[id];
+        const contenedor = document.getElementById('contenedor-video');
 
-        if (!tema) { window.location.href = "home.html"; }
+        if (tema) {
+            // Llenar info de texto
+            document.getElementById('titulo-tema').textContent = tema.titulo;
+            document.getElementById('artista-tema').textContent = tema.artista || "Artista desconocido";
+            document.getElementById('tono-tema').textContent = tema.tonalidad;
 
-        document.getElementById("btnVolver").onclick = () => window.location.href = `lista-temas.html?cat=${tema.categoria}`;
-        document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
-
-        document.getElementById("info-section").innerHTML = `
-            <div class="info-huayno">
-                <span class="tonalidad-tag">${tema.tonalidad}</span>
-                <h2 style="margin-top:10px;">${tema.titulo}</h2>
-                <p style="color:#e63946;">🎺 ${tema.artista}</p>
-            </div>
-        `;
-
-        let player;
-        window.onYouTubeIframeAPIReady = () => {
-            player = new YT.Player('player', {
-                videoId: tema.videoId,
-                playerVars: { start: tema.inicio, controls: 0, modestbranding: 1 }
-            });
-        };
-
-        window.saltar = (s) => player.seekTo(player.getCurrentTime() + s);
-        window.togglePlay = () => {
-            const s = player.getPlayerState();
-            const btn = document.getElementById("playBtn");
-            if(s === 1) { player.pauseVideo(); btn.innerText="PLAY"; }
-            else { player.playVideo(); btn.innerText="PAUSA"; }
-        };
+            // 2. LÓGICA DEL REPRODUCTOR UNIVERSAL
+            if (tema.videoId === null) {
+                // Caso: No hay video disponible todavía
+                contenedor.innerHTML = `<div style="text-align:center; color:#888;">
+                    <p>⚠️ Video no disponible para este tema.</p>
+                </div>`;
+            } 
+            else if (tema.fuente === "drive") {
+                // Caso: GOOGLE DRIVE
+                contenedor.innerHTML = `
+                    <iframe 
+                        src="https://drive.google.com/file/d/${tema.videoId}/preview" 
+                        allow="autoplay">
+                    </iframe>`;
+            } 
+            else {
+                // Caso: YOUTUBE (Por defecto)
+                // Usamos el ID y el tiempo de inicio (tema.inicio)
+                contenedor.innerHTML = `
+                    <iframe 
+                        src="https://www.youtube.com/embed/${tema.videoId}?start=${tema.inicio}" 
+                        allowfullscreen>
+                    </iframe>`;
+            }
+        } else {
+            contenedor.innerHTML = `<p style="color:red;">Error: Tema no encontrado.</p>`;
+        }
     </script>
-    <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
