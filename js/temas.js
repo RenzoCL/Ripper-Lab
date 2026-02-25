@@ -57,7 +57,7 @@ export const baseDeTemas = {
     "55": { titulo: "Márchate",                     artista: "Banda Show Espectáculo Quivilla",             tonalidad: "Re menor", videoId: "-rX5D7HEjNI", inicio: 550, categoria: "huayno", fuente: "youtube" },
     "56": { titulo: "Me Estás Sacando La Vuelta",   artista: "Banda Monumental de Huaraz",                  tonalidad: "Re menor", videoId: "kBvo6XCM_ug", inicio: 557, categoria: "huayno", fuente: "youtube" },
     "57": { titulo: "Mujer Carhuacina",             artista: "Banda Monumental de Huaraz",                  tonalidad: "Re menor", videoId: "1Z6kvNJLtd0otKwfIjhvKkEb3CDhsitje", inicio: 0, categoria: "huayno", fuente: "drive" },
-    "58": { titulo: "No Me Preguntes Por Ella",     artista: null,                                          tonalidad: "Re menor", videoId: null, inicio: 0, categoria: "huayno", fuente: "youtube" },
+    "58": { titulo: "No Me Preguntes Por Ella",     artista: "Gran Banda Sensación Chorrillana",            tonalidad: "Re menor", videoId: "1FCNqejqOjbuZfrGadSleWMYmwvjq1gpg", inicio: 0, categoria: "huayno", fuente: "drive" },
     "59": { titulo: "Pásame La Cerveza",            artista: "Banda Show La Huaranchal",                    tonalidad: "Re menor", videoId: "MO8Ctj3oC9E", inicio: 23, categoria: "huayno", fuente: "youtube" },
     "60": { titulo: "Por Ti",                       artista: "Banda Show Espectáculo Quivilla",             tonalidad: "Re menor", videoId: "kBvo6XCM_ug", inicio: 557, categoria: "huayno", fuente: "youtube" },
     "61": { titulo: "Soledad",                      artista: "Banda Orquesta Social Huancaya (BOSH)",       tonalidad: "Re menor", videoId: "cV5ZcytWfJ8", inicio: 328, categoria: "huayno", fuente: "youtube" },
