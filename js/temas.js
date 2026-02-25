@@ -52,7 +52,7 @@ export const baseDeTemas = {
     "50": { titulo: "Capitalina",                   artista: "Banda Orquesta Corazón de Huandoval",         tonalidad: "Re menor", videoId: "A8LRNb7pz8E", inicio: 23, categoria: "huayno", fuente: "youtube" },
     "51": { titulo: "Como Duele el Corazón",        artista: "Banda Show La Huaranchal",                    tonalidad: "Re menor", videoId: "gJ7axr_iHqM", inicio: 347, categoria: "huayno", fuente: "youtube" },
     "52": { titulo: "El Coche de su Madre",         artista: "Banda Show La Huaranchal",                    tonalidad: "Re menor", videoId: "Ulqak7ViLb0", inicio: 111, categoria: "huayno", fuente: "youtube" },
-    "53": { titulo: "La Proforma",                  artista: "Banda Show Espectáculo Quivilla",             tonalidad: "Re menor", videoId: "1fT1glXjYhy74m0WcLz31cnNb2WEGhXqR", inicio: 0, categoria: "huayno", fuente: "drive" },
+    "53": { titulo: "La Proforma",                  artista: "Banda Perú Armonía y Clase (PAC)",            tonalidad: "Re menor", videoId: "1fT1glXjYhy74m0WcLz31cnNb2WEGhXqR", inicio: 0, categoria: "huayno", fuente: "drive" },
     "54": { titulo: "Lloro Por Tu Amor",            artista: "Banda Show La Huaranchal",                    tonalidad: "Re menor", videoId: "XZbuk64FDMI", inicio: 0, categoria: "huayno", fuente: "youtube" },
     "55": { titulo: "Márchate",                     artista: "Banda Show Espectáculo Quivilla",             tonalidad: "Re menor", videoId: "-rX5D7HEjNI", inicio: 550, categoria: "huayno", fuente: "youtube" },
     "56": { titulo: "Me Estás Sacando La Vuelta",   artista: "Banda Monumental de Huaraz",                  tonalidad: "Re menor", videoId: "kBvo6XCM_ug", inicio: 557, categoria: "huayno", fuente: "youtube" },
