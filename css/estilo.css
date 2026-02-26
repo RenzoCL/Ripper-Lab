@@ -246,3 +246,128 @@ nav {
     font-size: 0.9rem;
     color: #ccc;
 }
+
+/* --- Estilos tipo Netflix --- */
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    background: linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+    backdrop-filter: blur(4px);
+}
+.header-inner{
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+}
+.logo{ font-weight: 900; letter-spacing: 2px; color: #e6e6e6; font-size: 1.4rem; }
+.main-nav a{ color: #ddd; margin: 0 12px; text-decoration: none; font-weight: 600; }
+.main-nav a:hover{ color: #fff; }
+.header-actions .btn-sign{ background: #e63946; padding: 8px 14px; border-radius: 4px; color: white; text-decoration: none; }
+
+.hero{
+    height: 78vh;
+    display: flex;
+    align-items: center;
+    color: white;
+    padding-top: 70px; /* espacio para header fijo */
+    background-image:
+        linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.85) 100%),
+        url('../imagenes/huayno.webp');
+    background-size: cover, cover;
+    background-position: center center, center center;
+    background-repeat: no-repeat, no-repeat;
+}
+.hero-content{ max-width: 1200px; margin: 0 auto; padding: 40px 24px; display:flex; gap:24px; align-items:flex-start; }
+.hero-left{ flex:1; max-width:720px; }
+.hero-left h1{ font-size: 3rem; margin:0 0 12px; color: #fff; }
+.hero-left p{ color: #cfcfcf; font-size:1.05rem; margin-bottom:18px; }
+.hero-ctas .btn{ margin-right:10px; text-decoration:none; padding:12px 20px; border-radius:6px; font-weight:700; }
+.btn-primary{ background:#e6e6e6; color:#000; }
+.btn-outline{ background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; }
+
+.login-panel{ width:320px; background: rgba(18,18,18,0.75); padding:18px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.login-panel h2{ margin:0 0 8px; color:#fff; font-size:1.1rem; }
+.login-panel label{ display:block; font-size:0.8rem; color:#cfcfcf; margin-top:10px; }
+.login-input{ width:100%; padding:10px 12px; margin-top:6px; border-radius:6px; border:1px solid #333; background:#0f0f0f; color:#fff; box-sizing:border-box; }
+.btn-login{ width:100%; margin-top:12px; padding:10px 12px; background:#e63946; border:none; color:white; border-radius:6px; cursor:pointer; font-weight:700; }
+.btn-whatsapp{ display:inline-block; margin-top:10px; background:#25D366; padding:8px 12px; color:#fff; border-radius:20px; text-decoration:none; }
+.whatsapp-text{ color:#bbb; font-size:0.85rem; margin-top:8px; }
+
+.site-main{ padding: 30px 24px 80px; max-width:1200px; margin: 0 auto; }
+.row{ margin-bottom:28px; }
+.row-title{ color:#fff; margin:0 0 12px; font-size:1.1rem; }
+.row-cards{ display:flex; gap:12px; overflow-x:auto; padding-bottom:6px; }
+.row-cards::-webkit-scrollbar{ height:8px; }
+.row-cards::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.08); border-radius:8px; }
+.card{ min-width:180px; background:#141414; border-radius:6px; overflow:hidden; cursor:pointer; transition: transform 0.2s ease; }
+.card:hover{ transform: translateY(-8px); }
+.poster{ height:110px; background: linear-gradient(135deg,#333,#222); }
+
+/* Hero derecho con imagen destacada */
+.hero-right {
+    flex: 0.9;
+    max-width: 720px;
+    width: 48%;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6), 0 6px 18px rgba(0,0,0,0.5);
+}
+.hero-right::after{ content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.85) 100%); border-radius:12px }
+.featured-info{ position:absolute; left:32px; bottom:32px; z-index:2; color:#fff; max-width:68%; }
+.featured-info h1{ font-size:2.2rem; margin:0 0 8px }
+.play-btn{ display:inline-flex; align-items:center; gap:10px; background: rgba(255,255,255,0.12); color:#fff; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:700 }
+
+/* Cards más grandes para Home */
+.row-cards .card{ min-width:360px; flex:0 0 auto }
+.row-cards .poster{ height:200px; border-radius:8px; background-size:cover; background-position:center; display:block; overflow:hidden }
+.row-cards .poster img{ width:100%; height:100%; object-fit:cover; display:block }
+.card .card-meta{ padding:10px 6px }
+.card .card-meta h4{ margin:0; font-size:1rem }
+
+@media (max-width: 1024px){
+    .hero-right{ display:none }
+    .row-cards .card{ min-width:240px }
+    .row-cards .poster{ height:140px }
+}
+
+/* Carrusel: botones y fades */
+.carousel{ position:relative; display:flex; align-items:center }
+.carousel-btn{ background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(255,255,255,0.06); width:44px; height:44px; border-radius:6px; cursor:pointer; z-index:10 }
+.carousel-btn:hover{ background:rgba(255,255,255,0.06) }
+.carousel .prev{ margin-right:12px }
+.carousel .next{ margin-left:12px }
+.carousel .row-cards{ padding:8px 0; overflow-x: hidden }
+
+.scroll-fade{ position:absolute; top:0; bottom:0; width:72px; pointer-events:none; z-index:8; display:none }
+.scroll-fade.left{ left:0; background: linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0)) }
+.scroll-fade.right{ right:0; background: linear-gradient(to left, rgba(0,0,0,0.9), rgba(0,0,0,0)) }
+
+@media (max-width: 800px){
+    .carousel-btn{ display:none }
+    .scroll-fade{ display:block }
+    /* permitir swipe táctil en móvil */
+    .carousel .row-cards{ overflow-x: auto }
+}
+
+.site-footer{ text-align:center; padding:30px 10px; color:#777; border-top:1px solid rgba(255,255,255,0.03); }
+.muted{ color:#999; }
+
+@media (max-width: 800px){
+    .hero-left h1{ font-size:2rem; }
+    .hero-content{ flex-direction:column; gap:16px; }
+    .login-panel{ width:100%; }
+    .main-nav{ display:none; }
+}
+
+/* Mantener compatibilidad con estilos existentes */
+.error-text{ color: #ff4d4d; background: rgba(255, 77, 77, 0.06); padding:8px; border-radius:6px; font-size:0.9rem; display:none; }
