@@ -1,37 +1,37 @@
 // js/seguridad.js
 import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { doc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Generar o recuperar un ID único para el navegador actual
+// ── Genera o recupera un ID único por navegador ──
 export const getDeviceId = () => {
-    let id = localStorage.getItem("deviceId");
+    let id = localStorage.getItem("rip_deviceId");
     if (!id) {
         id = crypto.randomUUID();
-        localStorage.setItem("deviceId", id);
+        localStorage.setItem("rip_deviceId", id);
     }
     return id;
 };
 
+// ── Pantalla de expulsión ──
 export function manejarExpulsion(contenedor, auth) {
+    if (!contenedor) return;
     contenedor.innerHTML = `
         <div class="expulsion-card">
-            <h3>🚫 Sesión en uso</h3>
-            <p>Se ha detectado que alguien más ingresó a tu cuenta desde otro dispositivo.</p>
-            <div class="aviso-importante">
-                ⚠️ <strong>Recuerda:</strong> Por seguridad, el acceso está permitido a <b>un solo dispositivo a la vez</b>.
+            <h3 style="color:#e50914; font-size:1.5rem; margin-bottom:12px;">🚫 Sesión desplazada</h3>
+            <p style="color:#ccc;">Tu cuenta fue abierta en otro dispositivo.</p>
+            <div class="aviso-importante" style="margin:18px 0;">
+                ⚠️ <strong>Recuerda:</strong> Solo se permite <b>un dispositivo activo</b> por cuenta.
             </div>
-            <p style="margin-top:20px; font-size:1.1rem; color:#fff;">
-                Cerrando sesión en <span id="segundos-restantes">10</span> segundos...
+            <p style="color:#fff; font-size:1rem;">
+                Cerrando sesión en <span id="seg-cuenta" style="color:#e50914; font-weight:700;">10</span>s...
             </p>
-        </div>
-    `;
+        </div>`;
 
     let seg = 10;
     const t = setInterval(async () => {
         seg--;
-        const span = document.getElementById("segundos-restantes");
-        if (span) span.innerText = seg;
-        
+        const el = document.getElementById("seg-cuenta");
+        if (el) el.textContent = seg;
         if (seg <= 0) {
             clearInterval(t);
             await signOut(auth);
@@ -40,39 +40,50 @@ export function manejarExpulsion(contenedor, auth) {
     }, 1000);
 }
 
-// ESTA ES LA FUNCIÓN QUE BLOQUEA TODO
+// ── Vigilancia activa: 1 dispositivo por cuenta ──
 export function vigilarSesion(auth, db, contenedorId) {
     const deviceId = getDeviceId();
+    let snapshotUnsub = null;
 
     auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            const sessionRef = doc(db, "sessions", user.uid);
-
-            // 1. Reclamar este dispositivo como el activo en esta página
-            await setDoc(sessionRef, { 
-                deviceId: deviceId,
-                lastActive: new Date().getTime()
-            }, { merge: true });
-
-            // 2. Escuchar cambios en tiempo real
-            onSnapshot(sessionRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.deviceId !== deviceId) {
-                        const wrapper = document.getElementById(contenedorId);
-                        manejarExpulsion(wrapper, auth);
-                    }
-                }
-            });
-        } else {
-            // Si no hay usuario y no estamos en index, mandar al login
+        if (!user) {
+            // Sin sesión → login
             if (!window.location.pathname.includes("index.html")) {
                 window.location.href = "index.html";
             }
+            return;
         }
+
+        const sessionRef = doc(db, "sessions", user.uid);
+
+        // 1. Registrar este dispositivo como el activo
+        try {
+            await setDoc(sessionRef, {
+                deviceId,
+                lastActive: serverTimestamp()
+            }, { merge: true });
+        } catch (e) {
+            console.warn("No se pudo registrar la sesión:", e);
+        }
+
+        // 2. Escuchar cambios en tiempo real
+        if (snapshotUnsub) snapshotUnsub(); // Limpiar listener previo
+        snapshotUnsub = onSnapshot(sessionRef, (snap) => {
+            if (!snap.exists()) return;
+            const data = snap.data();
+            // Si el deviceId en Firestore ya no es el nuestro → expulsión
+            if (data.deviceId && data.deviceId !== deviceId) {
+                if (snapshotUnsub) { snapshotUnsub(); snapshotUnsub = null; }
+                const wrapper = document.getElementById(contenedorId);
+                manejarExpulsion(wrapper, auth);
+            }
+        }, (err) => {
+            console.warn("Error al escuchar sesión:", err);
+        });
     });
 }
 
+// ── Cerrar sesión global ──
 export async function globalLogout(auth) {
     await signOut(auth);
     window.location.href = "index.html";

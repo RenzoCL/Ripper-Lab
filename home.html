@@ -3,114 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio</title>
+    <title>Inicio — Ripper</title>
     <link rel="stylesheet" href="css/estilo.css">
-
-    <style>
-        /* El contenedor que manda a todos */
-        .nav-buttons {
-            display: flex;
-            align-items: center; /* Esto alinea los centros de los botones */
-            gap: 8px;
-            height: 100%;       /* Para que ocupe todo el alto del nav */
-        }
-
-        /* Tu botón de Admin (es un <a>) */
-        .btn-admin-link {
-            display: flex;         /* Cambiado a flex para centrar el texto adentro */
-            align-items: center;   /* Centra el texto verticalmente */
-            justify-content: center;
-            background: #1a1a1a; 
-            color: #fff;
-            height: 34px;          /* Altura fija exacta */
-            padding: 0 15px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.75rem;
-            border: 1px solid #444;
-            box-sizing: border-box;
-            margin: 0;             /* Eliminamos cualquier margen residual */
-        }
-
-        /* Tu botón de Logout (es un <button>) */
-        /* Asegúrate de que tenga la misma altura que el de admin */
-        .btn-logout {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 34px;          /* ¡IMPORTANTE! Misma altura que el admin */
-            padding: 0 15px;
-            font-size: 0.75rem;
-            margin: 0;
-            box-sizing: border-box;
-            cursor: pointer;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 60px;          /* Altura fija del header */
-            padding: 0 20px;
-            background: #1a1a1a;      /* O tu color de fondo */
-            border-bottom: 1px solid #1a1a1a;
-        }
-    </style>
 </head>
 <body>
     <div id="home-wrapper">
+
+        <!-- ══ HEADER ══ -->
         <header class="site-header">
             <div class="header-inner">
-                <div class="logo">RIPPER</div>
-                <div class="header-actions">
-                    <button id="btnLogOut" class="btn-nav btn-logout">Cerrar Sesión</button>
+                <div class="col-left">
+                    <!-- Botón admin: solo visible para admin@ripper.com (se inyecta vía JS) -->
+                    <span id="admin-zone"></span>
+                </div>
+                <div class="col-mid">
+                    <a href="home.html" class="logo">RIPPER</a>
+                </div>
+                <div class="col-right">
+                    <button id="btnLogOut" class="btn-nav btn-logout">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span>Cerrar Sesión</span>
+                    </button>
                 </div>
             </div>
         </header>
 
+        <!-- ══ HERO ══ -->
         <section class="hero">
             <div class="hero-content">
                 <div class="hero-left">
-                    <h1>Huaynos (Estilo Huaraz)</h1>
+                    <h1>Huaynos — Estilo Huaraz</h1>
                     <p>Escucha los huaynos mientras miras la partitura.</p>
                     <div class="hero-ctas">
-                        <a class="play-btn" href="lista-temas.html?cat=huayno">Explorar</a>
+                        <a class="play-btn" href="lista-temas.html?cat=huayno">▶&nbsp; Explorar</a>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- ══ MAIN ══ -->
         <main class="site-main">
-            <h2 class="row-title" style="margin-top:0;">Recomendados para ti</h2>
+
             <section class="row">
-                
+                <h2 class="row-title">Recomendados para ti</h2>
                 <div class="carousel">
-                    <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                    <button class="carousel-btn prev">◀</button>
                     <div class="row-cards" data-carousel>
                         <a class="card" href="lista-temas.html?cat=huayno">
-                            <div class="poster"><img src="imagenes/huayno.webp" alt="Huayno (Estilo Huaraz)"></div>
+                            <div class="poster"><img src="imagenes/huayno.webp" alt="Huayno"></div>
                             <div class="card-meta"><h4>Huayno (Estilo Huaraz)</h4></div>
                         </a>
-                        <div class="card">
-                            <div class="poster" style="background:linear-gradient(135deg,#3a3a3a,#1f1f1f)"></div>
-                            <div class="card-meta"><h4>Métodos</h4></div>
-                        </div>
-                        <div class="card">
-                            <div class="poster" style="background:linear-gradient(135deg,#2b2b40,#1a1a2a)"></div>
-                            <div class="card-meta"><h4>Cumbias</h4></div>
-                        </div>
-                        <div class="card">
-                            <div class="poster" style="background:linear-gradient(135deg,#36221f,#121212)"></div>
-                            <div class="card-meta"><h4>Marineras</h4></div>
-                        </div>
-                        <div class="card">
-                            <div class="poster" style="background:linear-gradient(135deg,#1f2b3a,#0c0f12)"></div>
-                            <div class="card-meta"><h4>Bolo</h4></div>
-                        </div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#3a3a3a,#1a1a1a)"></div><div class="card-meta"><h4>Métodos</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#2b2b40,#12121f)"></div><div class="card-meta"><h4>Cumbias</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#36221f,#0d0808)"></div><div class="card-meta"><h4>Marineras</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#1f2b3a,#080c10)"></div><div class="card-meta"><h4>Bolo</h4></div></div>
                     </div>
-                    <button class="carousel-btn next" aria-label="Siguiente">▶</button>
-
+                    <button class="carousel-btn next">▶</button>
                     <div class="scroll-fade left"></div>
                     <div class="scroll-fade right"></div>
                 </div>
@@ -119,13 +71,13 @@
             <section class="row">
                 <h3 class="row-title">Nuevos</h3>
                 <div class="carousel">
-                    <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                    <button class="carousel-btn prev">◀</button>
                     <div class="row-cards" data-carousel>
-                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#252525,#141414)"></div><div class="card-meta"><h4>Nuevo 01</h4></div></div>
-                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#2a1f2a,#0f0f10)"></div><div class="card-meta"><h4>Nuevo 02</h4></div></div>
-                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#102a2a,#071212)"></div><div class="card-meta"><h4>Nuevo 03</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#252525,#111)"></div><div class="card-meta"><h4>Nuevo 01</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#2a1f2a,#0c0a0c)"></div><div class="card-meta"><h4>Nuevo 02</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#102a2a,#060f0f)"></div><div class="card-meta"><h4>Nuevo 03</h4></div></div>
                     </div>
-                    <button class="carousel-btn next" aria-label="Siguiente">▶</button>
+                    <button class="carousel-btn next">▶</button>
                     <div class="scroll-fade left"></div>
                     <div class="scroll-fade right"></div>
                 </div>
@@ -134,65 +86,63 @@
             <section class="row">
                 <h3 class="row-title">Populares</h3>
                 <div class="carousel">
-                    <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                    <button class="carousel-btn prev">◀</button>
                     <div class="row-cards" data-carousel>
-                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#2b1b1b,#0d0d0d)"></div><div class="card-meta"><h4>Popular 01</h4></div></div>
-                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#1b2b1b,#081008)"></div><div class="card-meta"><h4>Popular 02</h4></div></div>
-                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#251e31,#05050a)"></div><div class="card-meta"><h4>Popular 03</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#2b1b1b,#0a0808)"></div><div class="card-meta"><h4>Popular 01</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#1b2b1b,#080e08)"></div><div class="card-meta"><h4>Popular 02</h4></div></div>
+                        <div class="card"><div class="poster" style="background:linear-gradient(135deg,#251e31,#050408)"></div><div class="card-meta"><h4>Popular 03</h4></div></div>
                     </div>
-                    <button class="carousel-btn next" aria-label="Siguiente">▶</button>
+                    <button class="carousel-btn next">▶</button>
                     <div class="scroll-fade left"></div>
                     <div class="scroll-fade right"></div>
                 </div>
             </section>
         </main>
-    </div>
+
+    </div><!-- #home-wrapper -->
 
     <script type="module">
         import { auth, db } from "./firebase.js";
         import { vigilarSesion, globalLogout } from "./js/seguridad.js";
-        // Importamos la función necesaria para detectar el cambio de usuario
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 1. Vigilancia activa en el Home
-        vigilarSesion(auth, db, "home-wrapper");
+        const ADMIN_EMAIL = "admin@ripper.com";
 
-        // 2. Lógica para mostrar el botón de Admin (Solo para ti)
-        const ADMIN_EMAIL = "admin@ripper.com"; // 👈 REEMPLAZA CON TU CORREO
-        const adminZone = document.getElementById("admin-zone");
+        vigilarSesion(auth, db, "home-wrapper");
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === ADMIN_EMAIL) {
-                if (adminZone) {
-                    // Sin espacios ni saltos de línea antes o después de la etiqueta <a>
-                    adminZone.innerHTML = `<a href="admin.html" class="btn-admin-link">⚙️ Panel Administrador</a>`;
-                    // Forzamos que el span no tenga margen propio
-                    adminZone.style.display = "flex";
-                    adminZone.style.alignItems = "center";
+                const zone = document.getElementById("admin-zone");
+                if (zone) {
+                    zone.innerHTML = `
+                        <a href="admin.html" class="btn-nav btn-admin">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                            </svg>
+                            <span>Admin</span>
+                        </a>`;
                 }
             }
         });
 
-        // 3. Botón de Cerrar Sesión
         document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
     </script>
+
     <script>
-        // Carrusel: prev/next para el primer row-cards
-        (function(){
-            const carousels = document.querySelectorAll('[data-carousel]');
-            carousels.forEach((row)=>{
-                const wrapper = row.closest('.carousel');
-                if(!wrapper) return;
-                const prev = wrapper.querySelector('.carousel-btn.prev');
-                const next = wrapper.querySelector('.carousel-btn.next');
-                const card = row.querySelector('.card');
-                function scrollBy(direction){
-                    const gap = parseInt(getComputedStyle(row).gap) || 12;
-                    const cardWidth = card ? card.getBoundingClientRect().width + gap : 360;
-                    row.scrollBy({ left: cardWidth * direction, behavior: 'smooth' });
+        (function() {
+            document.querySelectorAll('[data-carousel]').forEach(row => {
+                const wrap = row.closest('.carousel');
+                if (!wrap) return;
+                const prev = wrap.querySelector('.carousel-btn.prev');
+                const next = wrap.querySelector('.carousel-btn.next');
+                function scrollIt(dir) {
+                    const card = row.querySelector('.card');
+                    const gap  = parseInt(getComputedStyle(row).gap) || 14;
+                    const w    = card ? card.getBoundingClientRect().width + gap : 360;
+                    row.scrollBy({ left: w * dir, behavior: 'smooth' });
                 }
-                if(prev) prev.addEventListener('click', ()=> scrollBy(-1));
-                if(next) next.addEventListener('click', ()=> scrollBy(1));
+                if (prev) prev.addEventListener('click', () => scrollIt(-1));
+                if (next) next.addEventListener('click', () => scrollIt(1));
             });
         })();
     </script>

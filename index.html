@@ -6,24 +6,26 @@
     <title>Ripper</title>
     <link rel="stylesheet" href="css/estilo.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <meta name="description" content="Partituras y audios - Ripper">
     <link rel="icon" href="imagenes/favicon.png" type="image/png">
 </head>
 <body>
 
     <header class="site-header">
-            <div class="header-inner">
-            <div class="logo">RIPPER</div>
-            <div class="header-actions">
-                <a href="login.html" class="btn btn-sign">Iniciar sesión</a>
+        <div class="header-inner">
+            <div class="col-left"></div>
+            <div class="col-mid">
+                <a href="index.html" class="logo">RIPPER</a>
+            </div>
+            <div class="col-right">
+                <a href="login.html" class="btn-nav">Iniciar sesión</a>
             </div>
         </div>
     </header>
 
     <section class="hero">
         <div class="hero-content">
-                <div class="hero-left">
-                <h1>Huaynos (Estilo Huaraz)</h1>
+            <div class="hero-left">
+                <h1>Huaynos — Estilo Huaraz</h1>
                 <p>Escucha los huaynos mientras miras la partitura.</p>
                 <div class="hero-ctas">
                     <a class="btn btn-primary" href="login.html">Comenzar</a>
@@ -32,7 +34,7 @@
 
             <aside class="login-panel" id="login-panel">
                 <h2>Ingresa</h2>
-                <div id="error-msg" class="error-text" style="display:none"></div>
+                <div id="error-msg" class="error-text"></div>
                 <label>Correo</label>
                 <input type="email" id="email" placeholder="ejemplo@correo.com" class="login-input">
                 <label>Contraseña</label>
@@ -52,7 +54,7 @@
         <section class="row">
             <h3 class="row-title">Recomendados</h3>
             <div class="carousel">
-                <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                <button class="carousel-btn prev">◀</button>
                 <div class="row-cards" data-carousel>
                     <div class="card"><div class="poster"></div></div>
                     <div class="card"><div class="poster"></div></div>
@@ -60,48 +62,27 @@
                     <div class="card"><div class="poster"></div></div>
                     <div class="card"><div class="poster"></div></div>
                 </div>
-                <button class="carousel-btn next" aria-label="Siguiente">▶</button>
-                <div class="scroll-fade left"></div>
-                <div class="scroll-fade right"></div>
+                <button class="carousel-btn next">▶</button>
+                <div class="scroll-fade left"></div><div class="scroll-fade right"></div>
             </div>
         </section>
 
         <section class="row">
             <h3 class="row-title">Nuevos</h3>
             <div class="carousel">
-                <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                <button class="carousel-btn prev">◀</button>
                 <div class="row-cards" data-carousel>
                     <div class="card"><div class="poster"></div></div>
                     <div class="card"><div class="poster"></div></div>
                     <div class="card"><div class="poster"></div></div>
-                    <div class="card"><div class="poster"></div></div>
                 </div>
-                <button class="carousel-btn next" aria-label="Siguiente">▶</button>
-                <div class="scroll-fade left"></div>
-                <div class="scroll-fade right"></div>
-            </div>
-        </section>
-
-        <section class="row">
-            <h3 class="row-title">Populares</h3>
-            <div class="carousel">
-                <button class="carousel-btn prev" aria-label="Anterior">◀</button>
-                <div class="row-cards" data-carousel>
-                    <div class="card"><div class="poster"></div></div>
-                    <div class="card"><div class="poster"></div></div>
-                    <div class="card"><div class="poster"></div></div>
-                    <div class="card"><div class="poster"></div></div>
-                </div>
-                <button class="carousel-btn next" aria-label="Siguiente">▶</button>
-                <div class="scroll-fade left"></div>
-                <div class="scroll-fade right"></div>
+                <button class="carousel-btn next">▶</button>
+                <div class="scroll-fade left"></div><div class="scroll-fade right"></div>
             </div>
         </section>
     </main>
 
-    <footer class="site-footer">
-        HECHO POR <span class="muted">RENZO CHAVARRIA</span>
-    </footer>
+    <footer class="site-footer">HECHO POR <span class="muted">RENZO CHAVARRIA</span></footer>
 
     <script type="module">
         import { auth } from "./firebase.js";
@@ -110,45 +91,36 @@
         const btnLogin = document.getElementById("btnLogin");
         const errorMsg = document.getElementById("error-msg");
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) { window.location.replace("home.html"); }
-        });
+        onAuthStateChanged(auth, user => { if (user) window.location.replace("home.html"); });
 
         btnLogin.onclick = async () => {
             const email = document.getElementById("email").value;
-            const pass = document.getElementById("password").value;
-            if(!email || !pass) return;
-            btnLogin.innerText = "VERIFICANDO...";
+            const pass  = document.getElementById("password").value;
+            if (!email || !pass) return;
+            btnLogin.textContent = "VERIFICANDO...";
             errorMsg.style.display = "none";
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
-            } catch (error) {
-                btnLogin.innerText = "ENTRAR";
+            } catch {
+                btnLogin.textContent = "ENTRAR";
                 errorMsg.style.display = "block";
-                errorMsg.innerText = "Acceso denegado. Verifica tus datos.";
+                errorMsg.textContent = "Acceso denegado. Verifica tus datos.";
             }
         };
     </script>
     <script>
-        (function(){
-            const carousels = document.querySelectorAll('[data-carousel]');
-            carousels.forEach((row)=>{
-                const wrapper = row.closest('.carousel');
-                if(!wrapper) return;
-                const prev = wrapper.querySelector('.carousel-btn.prev');
-                const next = wrapper.querySelector('.carousel-btn.next');
-                const card = row.querySelector('.card');
-                function scrollBy(direction){
-                    const gap = parseInt(getComputedStyle(row).gap) || 12;
-                    const cardWidth = card ? card.getBoundingClientRect().width + gap : 360;
-                    row.scrollBy({ left: cardWidth * direction, behavior: 'smooth' });
+        (function() {
+            document.querySelectorAll('[data-carousel]').forEach(row => {
+                const wrap = row.closest('.carousel'); if (!wrap) return;
+                const prev = wrap.querySelector('.carousel-btn.prev');
+                const next = wrap.querySelector('.carousel-btn.next');
+                function go(d) {
+                    const c = row.querySelector('.card');
+                    const w = c ? c.getBoundingClientRect().width + 14 : 360;
+                    row.scrollBy({ left: w * d, behavior: 'smooth' });
                 }
-                if(prev) prev.addEventListener('click', ()=> scrollBy(-1));
-                if(next) next.addEventListener('click', ()=> scrollBy(1));
-
-                // Evitar que el usuario haga scroll horizontal manual
-                row.addEventListener('wheel', (e)=>{ e.preventDefault(); }, {passive:false});
-                row.addEventListener('touchmove', (e)=>{ e.preventDefault(); }, {passive:false});
+                if (prev) prev.addEventListener('click', () => go(-1));
+                if (next) next.addEventListener('click', () => go(1));
             });
         })();
     </script>

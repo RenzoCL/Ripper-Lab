@@ -3,143 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Ripper Lab</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Reproductor — Ripper</title>
     <link rel="stylesheet" href="css/estilo.css">
     <style>
-        :root {
-            --red: #e50914;
-            --red-glow: rgba(229, 9, 20, 0.4);
-            --bg: #080808;
-            --surface: #141414;
-            --surface2: #1f1f1f;
-            --border: rgba(255,255,255,0.06);
-            --text: #ffffff;
-            --muted: #a3a3a3;
-            --font-display: 'Bebas Neue', sans-serif;
-            --font-body: 'Outfit', sans-serif;
-        }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font-body);
-            min-height: 100vh;
-            overflow-x: hidden;
-            padding-top: 0;
-        }
-
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none; z-index: 9999; opacity: 0.4;
-        }
-
-        /* ══ HEADER ══ */
-        .rip-header {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: 64px; z-index: 2000;
-            background: linear-gradient(180deg, rgba(0,0,0,0.93) 0%, rgba(0,0,0,0.4) 100%);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            padding: 0 20px;
-        }
-        .rip-header .col-left  { justify-self: start; }
-        .rip-header .col-mid   { justify-self: center; }
-        .rip-header .col-right { justify-self: end; }
-
-        .rip-logo {
-            font-family: var(--font-display);
-            font-size: 2rem;
-            letter-spacing: 0.2em;
-            color: var(--red);
-            text-shadow: 0 0 28px var(--red-glow), 0 2px 10px rgba(0,0,0,0.9);
-            text-decoration: none;
-            user-select: none;
-        }
-
-        .btn-back {
-            display: flex; align-items: center; gap: 7px;
-            text-decoration: none; color: var(--muted);
-            font-size: 0.8rem; font-weight: 500;
-            letter-spacing: 0.06em; text-transform: uppercase;
-            padding: 7px 13px;
-            border: 1px solid var(--border); border-radius: 5px;
-            background: rgba(255,255,255,0.04);
-            transition: color 0.2s, border-color 0.2s, background 0.2s;
-        }
-        .btn-back:hover { color: white; border-color: rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); }
-        .btn-back svg { width: 13px; height: 13px; }
-
-        .btn-logout-rip {
-            display: flex; align-items: center; gap: 7px;
-            background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.28);
-            color: rgba(255,80,80,0.9);
-            font-size: 0.8rem; font-weight: 500;
-            letter-spacing: 0.06em; text-transform: uppercase;
-            padding: 7px 13px; border-radius: 5px;
-            cursor: pointer; font-family: var(--font-body);
-            transition: all 0.2s;
-        }
-        .btn-logout-rip:hover { background: rgba(229,9,20,0.2); color: #ff6b6b; border-color: rgba(229,9,20,0.5); }
-        .btn-logout-rip svg { width: 13px; height: 13px; }
-
-        /* ══ PAGE ══ */
+        /* ── PAGE BODY ── */
         .page-body {
-            padding: 84px 20px 50px;
+            padding: calc(var(--header-height) + 20px) 20px 50px;
             max-width: 860px; margin: 0 auto;
-            animation: fadeUp 0.45s ease both;
+            animation: fadeUp 0.4s ease both;
         }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 
-        /* ══ TITLE ══ */
-        .title-area { margin-bottom: 20px; }
-
+        /* ── TITLE AREA ── */
         .label-tag {
             display: inline-flex; align-items: center; gap: 6px;
             background: var(--red); color: white;
-            font-size: 0.63rem; font-weight: 600;
-            letter-spacing: 0.14em; text-transform: uppercase;
+            font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
             padding: 4px 10px; border-radius: 3px; margin-bottom: 10px;
         }
         .label-tag::before {
             content: ''; width: 5px; height: 5px; background: white;
-            border-radius: 50%; display: inline-block;
-            animation: blink 1.5s infinite;
+            border-radius: 50%; display: inline-block; animation: blink 1.5s infinite;
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
         .title-main {
             font-family: var(--font-display);
-            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-size: clamp(1.9rem, 5vw, 3rem);
             letter-spacing: 0.04em; line-height: 1;
             background: linear-gradient(135deg, #fff 60%, #777);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; margin-bottom: 9px;
+            background-clip: text; margin-bottom: 10px;
         }
-
-        .meta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
         .meta-item { font-size: 0.82rem; color: var(--muted); }
-        .meta-divider { width: 3px; height: 3px; background: #555; border-radius: 50%; }
-
+        .meta-dot  { width: 3px; height: 3px; background: #444; border-radius: 50%; }
         .tono-badge {
-            display: inline-block;
-            background: rgba(229,9,20,0.14); border: 1px solid rgba(229,9,20,0.38);
-            color: #ff6060; font-size: 0.72rem; font-weight: 600;
+            background: var(--red-dim); border: 1px solid rgba(229,9,20,0.38);
+            color: #ff6060; font-size: 0.7rem; font-weight: 600;
             padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em;
         }
 
-        /* ══ PLAYER ══ */
+        /* ── PLAYER ── */
         .player-wrapper {
             border-radius: 12px; overflow: hidden;
-            box-shadow: 0 0 0 1px var(--border), 0 28px 70px rgba(0,0,0,0.75), 0 0 50px rgba(229,9,20,0.07);
+            box-shadow: 0 0 0 1px var(--border), 0 24px 60px rgba(0,0,0,0.7), 0 0 50px rgba(229,9,20,0.06);
         }
 
         #video-container {
@@ -147,153 +55,161 @@
             background: #000; position: relative;
         }
 
+        /* LOADING */
         #loading-screen {
             position: absolute; inset: 0;
-            background: radial-gradient(ellipse at center, #1a0808 0%, #000 70%);
+            background: radial-gradient(ellipse at center, #150808 0%, #000 70%);
             z-index: 30; display: flex; flex-direction: column;
             align-items: center; justify-content: center; gap: 14px;
         }
         .loader-ring {
-            width: 46px; height: 46px;
-            border: 3px solid rgba(229,9,20,0.12);
-            border-top-color: var(--red); border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            width: 44px; height: 44px;
+            border: 3px solid rgba(229,9,20,0.1); border-top-color: var(--red);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to{transform:rotate(360deg)} }
-        .loader-text { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #555; }
+        .loader-text { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: #444; }
 
-        /* FORCED PLAY OVERLAY — absorbs all clicks, guides user to button below */
-        #aviso-play-pantalla {
+        /* ── YOUTUBE: overlay que fuerza usar el botón de abajo ── */
+        #yt-overlay {
             position: absolute; inset: 0;
-            background: radial-gradient(ellipse at center, rgba(229,9,20,0.06) 0%, rgba(0,0,0,0.78) 100%);
-            z-index: 25; display: none;
+            background: radial-gradient(ellipse at center, rgba(229,9,20,0.05) 0%, rgba(0,0,0,0.8) 100%);
+            z-index: 20; display: none;
             flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-            cursor: default;       /* no pointer cursor — can't click here */
-            pointer-events: all;   /* ABSORBE todos los clics, no llegan al video */
+            /* Absorbe clics — no permite interacción directa con el video */
+            pointer-events: all; cursor: default;
         }
-
-        .overlay-lock-icon { font-size: 2.2rem; opacity: 0.5; }
-        .overlay-hint {
-            font-size: 0.72rem; letter-spacing: 0.2em;
-            text-transform: uppercase; color: rgba(255,255,255,0.45);
+        .yt-overlay-hint {
+            font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
         }
-        .overlay-arrow {
-            font-size: 1.6rem; color: var(--red);
+        .yt-overlay-arrow {
+            font-size: 1.5rem; color: var(--red);
             animation: bounce 0.9s ease-in-out infinite;
         }
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(7px)} }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
 
-        /* Blockers */
+        /* ── DRIVE: bloquea solo la esquina de "abrir externamente" ── */
+        .capa-esquina-drive {
+            position: absolute; top: 0; right: 0;
+            width: 100px; height: 70px;
+            z-index: 15; display: none;
+            background: transparent; pointer-events: all; cursor: not-allowed;
+        }
+
+        /* Bloqueo total YT */
         .capa-full {
             position: absolute; inset: 0; z-index: 10; display: none;
             background: transparent; pointer-events: all; cursor: default;
         }
-        .capa-esquina-drive { position: absolute; top:0; right:0; width:80px; height:60px; z-index:10; display:none; }
 
-        #player, iframe { width: 100% !important; height: 100% !important; border: none; }
+        #player, #player iframe { width: 100% !important; height: 100% !important; border: none; }
 
-        /* ══ CONTROLS ══ */
+        /* ── CONTROLS PANEL (solo YouTube) ── */
         .controls-panel {
-            background: var(--surface); border: 1px solid var(--border);
-            border-top: none; border-radius: 0 0 12px 12px;
-            padding: 18px 22px; display: none;
-            flex-direction: column; align-items: center; gap: 14px;
+            background: var(--surface); border: 1px solid var(--border); border-top: none;
+            border-radius: 0 0 12px 12px; padding: 16px 20px;
+            display: none; flex-direction: column; align-items: center; gap: 14px;
         }
 
         .progress-track { width: 100%; height: 3px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--red), #ff4d4d); width: 0%; border-radius: 10px; transition: width 0.5s linear; }
+        .progress-fill  { height: 100%; width: 0%; background: linear-gradient(90deg,var(--red),#ff4d4d); border-radius: 10px; transition: width 0.5s linear; }
 
-        .controls-row { display: flex; align-items: center; gap: 7px; }
+        .controls-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; }
 
         .btn-seek {
             background: var(--surface2); border: 1px solid var(--border);
             color: var(--muted); width: 40px; height: 40px; border-radius: 8px;
-            cursor: pointer; font-size: 0.7rem; font-family: var(--font-body);
-            font-weight: 600; letter-spacing: -0.02em;
-            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            cursor: pointer; font-size: 0.68rem; font-family: var(--font-body); font-weight: 600;
             display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s, color 0.15s;
         }
-        .btn-seek:hover { background: rgba(255,255,255,0.09); color: white; border-color: rgba(255,255,255,0.18); }
+        .btn-seek:hover { background: rgba(255,255,255,0.09); color: white; }
 
         #btn-play {
             background: var(--red); border: none; color: white;
-            width: 64px; height: 64px; border-radius: 50%; cursor: pointer;
+            width: 62px; height: 62px; border-radius: 50%; cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
-            box-shadow: 0 4px 22px var(--red-glow);
+            box-shadow: 0 4px 20px var(--red-glow);
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; position: relative;
         }
-        /* Pulsating ring while paused */
         #btn-play:not(.playing)::after {
             content: ''; position: absolute; inset: -5px; border-radius: 50%;
-            border: 2px solid rgba(229,9,20,0.45);
+            border: 2px solid rgba(229,9,20,0.4);
             animation: pulse 1.8s ease-out infinite;
         }
-        @keyframes pulse { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(1.55);opacity:0} }
-        #btn-play:hover { transform: scale(1.07); box-shadow: 0 8px 32px var(--red-glow); }
+        @keyframes pulse { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(1.6);opacity:0} }
+        #btn-play:hover  { transform: scale(1.07); box-shadow: 0 8px 30px var(--red-glow); }
         #btn-play:active { transform: scale(0.96); }
-        #btn-play svg { width: 22px; height: 22px; fill: white; }
-        #btn-play.playing svg.icon-play  { display: none; }
-        #btn-play.playing svg.icon-pause { display: block !important; }
+        #btn-play svg { width: 21px; height: 21px; fill: white; }
+        #btn-play.playing .icon-play  { display: none; }
+        #btn-play.playing .icon-pause { display: block !important; }
 
-        .separator { width: 1px; height: 26px; background: var(--border); margin: 0 3px; }
+        .sep { width: 1px; height: 24px; background: var(--border); margin: 0 3px; }
 
         .btn-restart {
-            background: transparent; border: 1px solid var(--border);
-            color: var(--muted); padding: 0 13px; height: 34px; border-radius: 6px;
-            cursor: pointer; font-family: var(--font-body); font-size: 0.7rem;
-            font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
-            transition: all 0.15s; display: flex; align-items: center; gap: 5px;
+            background: transparent; border: 1px solid var(--border); color: var(--muted);
+            padding: 0 12px; height: 34px; border-radius: 6px; cursor: pointer;
+            font-family: var(--font-body); font-size: 0.68rem; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            display: flex; align-items: center; gap: 5px; transition: all 0.15s;
         }
-        .btn-restart:hover { border-color: rgba(255,255,255,0.18); color: white; }
+        .btn-restart:hover { color: white; border-color: var(--border2); }
         .btn-restart svg { width: 12px; height: 12px; }
 
-        #aviso-drive { margin-top: 14px; font-size: 0.78rem; color: var(--muted); text-align: center; display: none; }
+        /* Drive notice */
+        .drive-notice {
+            display: none; margin-top: 12px; padding: 10px 14px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 8px; font-size: 0.78rem; color: var(--muted); text-align: center;
+        }
 
-        @media (max-width: 500px) {
-            .page-body { padding: 74px 12px 40px; }
-            .rip-header { padding: 0 12px; }
-            .btn-back span, .btn-logout-rip span { display: none; }
-            .btn-seek { width: 34px; height: 34px; font-size: 0.65rem; }
-            #btn-play { width: 54px; height: 54px; }
+        @media (max-width: 480px) {
+            .page-body { padding-left: 12px; padding-right: 12px; }
+            .btn-seek  { width: 34px; height: 34px; font-size: 0.62rem; }
+            #btn-play  { width: 52px; height: 52px; }
         }
     </style>
 </head>
 <body>
 
     <!-- ══ HEADER ══ -->
-    <header class="rip-header">
-        <div class="col-left">
-            <a href="lista-temas.html" class="btn-back" id="btn-volver">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                <span>Volver</span>
-            </a>
-        </div>
-        <div class="col-mid">
-            <a href="home.html" class="rip-logo">RIPPER</a>
-        </div>
-        <div class="col-right">
-            <button id="btnLogOut" class="btn-logout-rip">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                <span>Cerrar Sesión</span>
-            </button>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="col-left">
+                <a href="lista-temas.html" class="btn-nav" id="btn-volver">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span>Volver</span>
+                </a>
+            </div>
+            <div class="col-mid">
+                <a href="home.html" class="logo">RIPPER</a>
+            </div>
+            <div class="col-right">
+                <button id="btnLogOut" class="btn-nav btn-logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
         </div>
     </header>
 
     <!-- ══ CONTENT ══ -->
     <div class="page-body">
-        <div class="title-area">
+
+        <div class="title-area" style="margin-bottom:18px;">
             <div class="label-tag">En reproducción</div>
             <h1 class="title-main" id="txt-titulo">Cargando...</h1>
             <div class="meta-row">
                 <span class="meta-item" id="txt-banda">--</span>
-                <span class="meta-divider"></span>
+                <span class="meta-dot"></span>
                 <span class="meta-item">Tonalidad: <span class="tono-badge" id="txt-tono">--</span></span>
             </div>
         </div>
@@ -303,26 +219,30 @@
                 <div id="player"></div>
 
                 <!--
-                    OVERLAY DE BLOQUEO FORZADO:
-                    - pointer-events: all → absorbe TODOS los clics, el video no los recibe
-                    - cursor: default → el usuario ve que no puede hacer clic aquí
-                    - Flecha animada apunta hacia el botón PLAY de abajo
+                    YT OVERLAY: solo aparece para YouTube.
+                    pointer-events:all → absorbe todos los clics al video.
+                    El usuario DEBE usar el botón PLAY de abajo.
                 -->
-                <div id="aviso-play-pantalla">
-                    <span class="overlay-lock-icon">🔒</span>
-                    <span class="overlay-hint">Usa el botón de abajo para reproducir</span>
-                    <span class="overlay-arrow">▼</span>
+                <div id="yt-overlay">
+                    <span style="font-size:2rem; opacity:0.4;">⏸</span>
+                    <span class="yt-overlay-hint">Usa el botón de abajo</span>
+                    <span class="yt-overlay-arrow">▼</span>
                 </div>
 
+                <!-- Loading -->
                 <div id="loading-screen">
                     <div class="loader-ring"></div>
                     <p class="loader-text">Obteniendo video</p>
                 </div>
 
-                <div id="capa-bloqueo-total" class="capa-full"></div>
-                <div id="capa-bloqueo-drive" class="capa-esquina-drive"></div>
+                <!-- YT: capa que bloquea el iframe completo -->
+                <div id="capa-yt" class="capa-full"></div>
+
+                <!-- Drive: solo bloquea la esquina superior derecha (botón de abrir externamente) -->
+                <div id="capa-drive-corner" class="capa-esquina-drive"></div>
             </div>
 
+            <!-- Panel de controles: solo visible para YouTube -->
             <div id="panel-controles" class="controls-panel">
                 <div class="progress-track">
                     <div class="progress-fill" id="progress-fill"></div>
@@ -343,7 +263,7 @@
                     <button class="btn-seek" onclick="seek(5)">+5s</button>
                     <button class="btn-seek" onclick="seek(10)">+10s</button>
 
-                    <div class="separator"></div>
+                    <div class="sep"></div>
 
                     <button class="btn-restart" onclick="reiniciar()">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -355,7 +275,10 @@
             </div>
         </div>
 
-        <p id="aviso-drive">⬆️ Usa los controles integrados del reproductor de arriba.</p>
+        <p class="drive-notice" id="aviso-drive">
+            ▶ Usa los controles del reproductor de arriba. El botón de "abrir externamente" está deshabilitado.
+        </p>
+
     </div>
 
     <script type="module">
@@ -363,98 +286,87 @@
         import { vigilarSesion, globalLogout } from "./js/seguridad.js";
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        vigilarSesion(auth, db, "page-body");
+        vigilarSesion(auth, db, "page-body"); // Nota: el div con este id es .page-body
         document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
 
-        const params = new URLSearchParams(window.location.search);
-        const idTema  = params.get('id');
+        const params   = new URLSearchParams(window.location.search);
+        const idTema   = params.get('id');
         const catParam = params.get('cat') || 'huayno';
 
-        // Preserva la categoría al volver
         document.getElementById('btn-volver').href = `lista-temas.html?cat=${catParam}`;
 
         window.player = null;
         let isYouTube = false;
         let playing   = false;
-        let inicioPredeterminado = 0;
+        let inicio    = 0;
         let temaData  = null;
 
         async function init() {
             if (!idTema) return;
             try {
-                const docSnap = await getDoc(doc(db, "temas", idTema));
-                if (docSnap.exists()) {
-                    temaData = docSnap.data();
-                    document.getElementById('txt-titulo').innerText = temaData.titulo;
-                    document.getElementById('txt-banda').innerText  = temaData.artista;
-                    document.getElementById('txt-tono').innerText   = temaData.tonalidad;
-                    inicioPredeterminado = temaData.inicio || 0;
-                    cargarAPI();
-                } else {
-                    document.getElementById('txt-titulo').innerText = "Video no encontrado";
+                const snap = await getDoc(doc(db, "temas", idTema));
+                if (!snap.exists()) {
+                    document.getElementById('txt-titulo').textContent = "Video no encontrado";
                     document.getElementById('loading-screen').style.display = 'none';
+                    return;
                 }
-            } catch (e) { console.error("Error:", e); }
-        }
+                temaData = snap.data();
+                document.getElementById('txt-titulo').textContent = temaData.titulo   || "Sin título";
+                document.getElementById('txt-banda').textContent  = temaData.artista  || "Artista";
+                document.getElementById('txt-tono').textContent   = temaData.tonalidad || "--";
+                inicio = temaData.inicio || 0;
 
-        function cargarAPI() {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            document.head.appendChild(tag);
+                // Cargar siempre la API de YouTube (needed both for YT and as trigger)
+                const s = document.createElement('script');
+                s.src = "https://www.youtube.com/iframe_api";
+                document.head.appendChild(s);
+            } catch (e) { console.error(e); }
         }
 
         window.onYouTubeIframeAPIReady = function() {
-            const panel = document.getElementById('panel-controles');
-            const aviso = document.getElementById('aviso-drive');
-
             if (temaData.fuente === "youtube") {
+                // ── YOUTUBE: forzar play desde nuestro botón ──
                 isYouTube = true;
-                panel.style.display = 'flex';
-
-                // Capa de bloqueo total del iframe
-                document.getElementById('capa-bloqueo-total').style.display = 'block';
+                document.getElementById('panel-controles').style.display = 'flex';
+                document.getElementById('capa-yt').style.display = 'block';  // Bloqueo total del iframe
 
                 window.player = new YT.Player('player', {
                     height: '100%', width: '100%',
                     videoId: temaData.videoId,
-                    playerVars: {
-                        'start': inicioPredeterminado,
-                        'controls': 0,
-                        'modestbranding': 1,
-                        'rel': 0,
-                        'disablekb': 1
-                    },
+                    playerVars: { start: inicio, controls: 0, modestbranding: 1, rel: 0, disablekb: 1 },
                     events: {
-                        'onReady': () => {
+                        onReady: () => {
                             document.getElementById('loading-screen').style.display = 'none';
-                            // Mostrar overlay que bloquea clics y apunta al botón
-                            document.getElementById('aviso-play-pantalla').style.display = 'flex';
+                            // Mostrar overlay que guía al botón
+                            document.getElementById('yt-overlay').style.display = 'flex';
                         },
-                        'onStateChange': onPlayerStateChange
+                        onStateChange: ytStateChange
                     }
                 });
+
             } else {
-                aviso.style.display = 'block';
-                document.getElementById('capa-bloqueo-drive').style.display = 'block';
+                // ── GOOGLE DRIVE: controles nativos OK, solo bloquear esquina de "abrir externamente" ──
+                document.getElementById('capa-drive-corner').style.display = 'block';
+                document.getElementById('aviso-drive').style.display = 'block';
+
                 const iframe = document.createElement('iframe');
                 iframe.src = `https://drive.google.com/file/d/${temaData.videoId}/preview`;
+                iframe.allow = "autoplay";
+                iframe.style.cssText = "width:100%;height:100%;border:none;";
                 iframe.onload = () => document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('player').appendChild(iframe);
             }
         };
 
-        function onPlayerStateChange(event) {
+        function ytStateChange(e) {
             const btn = document.getElementById('btn-play');
-            if (event.data == YT.PlayerState.PLAYING) {
-                btn.classList.add('playing');
-                playing = true;
-                document.getElementById('aviso-play-pantalla').style.display = 'none';
+            if (e.data === YT.PlayerState.PLAYING) {
+                btn.classList.add('playing'); playing = true;
+                document.getElementById('yt-overlay').style.display = 'none';
             } else {
-                btn.classList.remove('playing');
-                playing = false;
-                // Al pausar, el overlay vuelve a cubrir el video
-                if (event.data == YT.PlayerState.PAUSED) {
-                    document.getElementById('aviso-play-pantalla').style.display = 'flex';
+                btn.classList.remove('playing'); playing = false;
+                if (e.data === YT.PlayerState.PAUSED) {
+                    document.getElementById('yt-overlay').style.display = 'flex';
                 }
             }
         }
@@ -462,28 +374,23 @@
         // Barra de progreso
         setInterval(() => {
             if (window.player && isYouTube && playing) {
-                const dur = window.player.getDuration();
-                if (dur > 0) {
-                    document.getElementById('progress-fill').style.width =
-                        (window.player.getCurrentTime() / dur * 100) + '%';
-                }
+                const d = window.player.getDuration();
+                if (d > 0) document.getElementById('progress-fill').style.width =
+                    (window.player.getCurrentTime() / d * 100) + '%';
             }
         }, 500);
 
-        window.togglePlay = function() {
+        window.togglePlay = () => {
             if (!isYouTube || !window.player) return;
-            if (playing) window.player.pauseVideo();
-            else window.player.playVideo();
+            playing ? window.player.pauseVideo() : window.player.playVideo();
         };
-
-        window.seek = function(s) {
+        window.seek = s => {
             if (isYouTube && window.player)
                 window.player.seekTo(window.player.getCurrentTime() + s, true);
         };
-
-        window.reiniciar = function() {
+        window.reiniciar = () => {
             if (isYouTube && window.player) {
-                window.player.seekTo(inicioPredeterminado, true);
+                window.player.seekTo(inicio, true);
                 window.player.playVideo();
             }
         };

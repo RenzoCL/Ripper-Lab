@@ -2,171 +2,405 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Administrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Ripper</title>
     <link rel="stylesheet" href="css/estilo.css">
     <style>
-        .form-admin { max-width: 500px; margin: 20px auto; padding: 20px; background: #1a1a1a; border-radius: 15px; border: 1px solid #333; }
-        .form-admin input, .form-admin select { width: 100%; padding: 10px; margin: 8px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
-        .btn-save { width: 100%; padding: 15px; background: #e63946; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        
-        .tabla-temas { max-width: 800px; margin: 40px auto; width: 100%; border-collapse: collapse; background: #111; font-size: 0.9rem; }
-        .tabla-temas th, .tabla-temas td { padding: 12px; border: 1px solid #333; text-align: left; }
-        .btn-edit { background: #2196F3; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; }
-        .btn-delete { background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .admin-layout {
+            max-width: 1100px; margin: 0 auto;
+            padding: calc(var(--header-height) + 24px) 20px 60px;
+            animation: fadeUp 0.4s ease both;
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+        /* ── SECTION TITLE ── */
+        .section-label {
+            font-family: var(--font-display); font-size: 1.5rem;
+            letter-spacing: 0.08em; color: #fff; margin-bottom: 18px;
+        }
+        .section-label span { color: var(--red); }
+
+        /* ── FORM ── */
+        .form-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 24px; margin-bottom: 36px;
+        }
+        .form-title {
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-grid .full { grid-column: 1 / -1; }
+
+        .field { display: flex; flex-direction: column; gap: 5px; }
+        .field label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+        .field input, .field select {
+            padding: 10px 13px; border-radius: 7px;
+            border: 1px solid var(--border2); background: var(--surface2);
+            color: white; font-family: var(--font-body); font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .field input:focus, .field select:focus {
+            border-color: rgba(229,9,20,0.55);
+            box-shadow: 0 0 0 3px rgba(229,9,20,0.08);
+        }
+        .field select option { background: #1a1a1a; }
+
+        .form-actions { display: flex; gap: 10px; margin-top: 18px; align-items: center; flex-wrap: wrap; }
+
+        .btn-save {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 11px 22px; background: var(--red); border: none; color: white;
+            border-radius: 7px; font-family: var(--font-body); font-weight: 700;
+            font-size: 0.88rem; cursor: pointer; transition: filter 0.2s, transform 0.1s;
+        }
+        .btn-save:hover  { filter: brightness(1.1); }
+        .btn-save:active { transform: scale(0.98); }
+
+        .btn-cancel {
+            display: none; padding: 11px 18px;
+            background: transparent; border: 1px solid var(--border2); color: var(--muted);
+            border-radius: 7px; font-family: var(--font-body); font-size: 0.85rem; cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .btn-cancel:hover { color: white; border-color: rgba(255,255,255,0.25); }
+
+        #status-msg {
+            font-size: 0.82rem; padding: 8px 12px; border-radius: 6px; display: none;
+        }
+        #status-msg.ok  { background: rgba(80,200,100,0.1); color: #6ddf8a; border: 1px solid rgba(80,200,100,0.25); }
+        #status-msg.err { background: rgba(229,9,20,0.1);  color: #ff7070; border: 1px solid rgba(229,9,20,0.3); }
+
+        /* ── TABLE ── */
+        .table-wrap {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+        }
+        .table-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid var(--border);
+        }
+        .table-count { font-size: 0.78rem; color: var(--muted); }
+
+        #search-admin {
+            padding: 7px 12px; border-radius: 6px;
+            border: 1px solid var(--border2); background: var(--surface2);
+            color: white; font-family: var(--font-body); font-size: 0.82rem; outline: none; width: 200px;
+        }
+        #search-admin:focus { border-color: rgba(229,9,20,0.4); }
+
+        .tabla-admin {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .tabla-admin th {
+            padding: 11px 14px; text-align: left; font-size: 0.68rem;
+            letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+            border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
+        }
+        .tabla-admin td {
+            padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #ddd;
+        }
+        .tabla-admin tr:last-child td { border-bottom: none; }
+        .tabla-admin tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .source-badge {
+            display: inline-block; font-size: 0.62rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 4px; letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        .source-badge.yt    { background: rgba(229,9,20,0.2);  color: #ff6060; border: 1px solid rgba(229,9,20,0.3); }
+        .source-badge.drive { background: rgba(77,171,247,0.15); color: #74b7f5; border: 1px solid rgba(77,171,247,0.3); }
+
+        .row-actions { display: flex; gap: 6px; }
+        .btn-edit-row, .btn-del-row {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 10px; border-radius: 5px; cursor: pointer;
+            font-family: var(--font-body); font-size: 0.72rem; font-weight: 600;
+            border: 1px solid; transition: filter 0.15s;
+        }
+        .btn-edit-row:hover, .btn-del-row:hover { filter: brightness(1.15); }
+        .btn-edit-row { background: rgba(77,171,247,0.12); color: #74b7f5; border-color: rgba(77,171,247,0.25); }
+        .btn-del-row  { background: rgba(229,9,20,0.1);   color: #ff7070; border-color: rgba(229,9,20,0.25); }
+        .btn-edit-row svg, .btn-del-row svg { width: 11px; height: 11px; }
+
+        .empty-row td { text-align: center; padding: 40px !important; color: var(--muted2); }
+
+        @media (max-width: 700px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-grid .full { grid-column: 1; }
+            .tabla-admin th:nth-child(3),
+            .tabla-admin td:nth-child(3) { display: none; }
+        }
     </style>
 </head>
 <body>
-    <nav><a href="home.html" style="color:white; padding: 20px; display: block;">⬅ Volver al Inicio</a></nav>
-    
-    <div class="form-admin">
-        <h2 id="form-title">Añadir Nuevo Tema</h2>
-        <input type="hidden" id="edit-id"> <input type="text" id="titulo" placeholder="Título">
-        <input type="text" id="artista" placeholder="Artista">
-        <input type="text" id="tonalidad" placeholder="Tonalidad (ej: La menor)">
-        <input type="text" id="videoId" placeholder="ID del Video">
-        <input type="number" id="inicio" placeholder="Segundo de inicio">
-        
-        <select id="categoria">
-            <option value="huayno">Huayno</option>
-            <option value="salay">Salay</option>
-            <option value="cumbia">Cumbia</option>
-        </select>
 
-        <select id="fuente">
-            <option value="youtube">YouTube</option>
-            <option value="drive">Google Drive</option>
-        </select>
+    <!-- ══ HEADER ══ -->
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="col-left">
+                <a href="home.html" class="btn-nav">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span>Inicio</span>
+                </a>
+            </div>
+            <div class="col-mid">
+                <a href="home.html" class="logo">RIPPER</a>
+            </div>
+            <div class="col-right">
+                <button id="btnLogOut" class="btn-nav btn-logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>Salir</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-        <button id="btnGuardar" class="btn-save">GUARDAR TEMA</button>
-        <button id="btnCancelar" style="display:none; width:100%; background:none; color:gray; border:none; margin-top:10px; cursor:pointer;">Cancelar Edición</button>
-        <p id="status" style="text-align:center;"></p>
+    <div class="admin-layout" id="admin-layout">
+
+        <!-- FORM -->
+        <div class="form-card">
+            <p class="form-title" id="form-label">➕ Añadir nuevo tema</p>
+            <input type="hidden" id="edit-id">
+
+            <div class="form-grid">
+                <div class="field"><label>Título</label><input type="text" id="titulo" placeholder="Nombre del tema"></div>
+                <div class="field"><label>Artista</label><input type="text" id="artista" placeholder="Banda o artista"></div>
+                <div class="field"><label>Tonalidad</label><input type="text" id="tonalidad" placeholder="ej: La menor"></div>
+                <div class="field"><label>Segundo de inicio</label><input type="number" id="inicio" placeholder="0" min="0"></div>
+                <div class="field full"><label>ID del Video</label><input type="text" id="videoId" placeholder="ID de YouTube o Google Drive"></div>
+                <div class="field">
+                    <label>Categoría</label>
+                    <select id="categoria">
+                        <option value="huayno">Huayno</option>
+                        <option value="salay">Salay</option>
+                        <option value="cumbia">Cumbia</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Fuente</label>
+                    <select id="fuente">
+                        <option value="youtube">YouTube</option>
+                        <option value="drive">Google Drive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button id="btnGuardar" class="btn-save">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar tema
+                </button>
+                <button id="btnCancelar" class="btn-cancel">Cancelar</button>
+                <span id="status-msg"></span>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="section-label"><span>Repertorio</span></div>
+        <div class="table-wrap">
+            <div class="table-header">
+                <span class="table-count" id="table-count">Cargando...</span>
+                <input type="text" id="search-admin" placeholder="🔎 Filtrar...">
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="tabla-admin">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Artista</th>
+                            <th>Tonalidad</th>
+                            <th>Fuente</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body"></tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
-    <table class="tabla-temas">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Artista</th>
-                <th>Tonalidad</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="cuerpo-tabla">
-            </tbody>
-    </table>
-
     <script type="module">
-        // Importamos 'auth' además de 'db'
         import { db, auth } from "./firebase.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc }
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { globalLogout } from "./js/seguridad.js";
 
-        // --- CONFIGURACIÓN DE SEGURIDAD ---
-        const ADMIN_EMAIL = "admin@ripper.com"; // 👈 PON AQUÍ TU CORREO EXACTO
-        const cuerpoTabla = document.getElementById("cuerpo-tabla");
-        const btnGuardar = document.getElementById("btnGuardar");
-        const btnCancelar = document.getElementById("btnCancelar");
+        const ADMIN_EMAIL = "admin@ripper.com";
 
-        // 0. VERIFICAR SI ES EL ADMIN
-        onAuthStateChanged(auth, (user) => {
+        let allTemas = []; // Cache local
+
+        // ── Auth guard ──
+        onAuthStateChanged(auth, user => {
             if (user && user.email === ADMIN_EMAIL) {
-                console.log("Acceso autorizado");
-                cargarLista(); // Solo carga los datos si eres tú
+                cargarTemas();
             } else {
-                alert("CHISTOSO. No tienes permiso para estar aquí.");
-                window.location.href = "home.html"; // Redirige a los intrusos
+                alert("Acceso denegado.");
+                window.location.href = "home.html";
             }
         });
-            // --- 1. CARGAR LISTA DE TEMAS ---
-            async function cargarLista() {
-                cuerpoTabla.innerHTML = "<tr><td colspan='4'>Cargando temas...</td></tr>";
-                const snap = await getDocs(collection(db, "temas"));
-                cuerpoTabla.innerHTML = "";
 
-                snap.forEach(documento => {
-                    const t = documento.data();
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${t.titulo}</td>
-                        <td>${t.artista}</td>
-                        <td>${t.tonalidad}</td>
-                        <td>
-                            <button class="btn-edit" onclick="prepararEdicion('${documento.id}')">Editar</button>
-                            <button class="btn-delete" onclick="eliminarTema('${documento.id}')">Eliminar</button>
-                        </td>
-                    `;
-                    cuerpoTabla.appendChild(tr);
-                });
-            }
+        document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
 
-        // --- 2. GUARDAR O ACTUALIZAR ---
-        btnGuardar.onclick = async () => {
-            const idParaEditar = document.getElementById("edit-id").value;
-            const data = {
-                titulo: document.getElementById("titulo").value,
-                artista: document.getElementById("artista").value,
-                tonalidad: document.getElementById("tonalidad").value,
-                videoId: document.getElementById("videoId").value,
-                inicio: parseInt(document.getElementById("inicio").value) || 0,
-                categoria: document.getElementById("categoria").value,
-                fuente: document.getElementById("fuente").value
-            };
-
-            try {
-                if (idParaEditar) {
-                    // ACTUALIZAR
-                    await updateDoc(doc(db, "temas", idParaEditar), data);
-                    alert("¡Actualizado!");
-                } else {
-                    // CREAR NUEVO
-                    await addDoc(collection(db, "temas"), data);
-                    alert("¡Creado!");
-                }
-                limpiarFormulario();
-                cargarLista();
-            } catch (e) { alert("Error: " + e.message); }
-        };
-
-        // --- 3. PREPARAR EDICIÓN (Cargar datos al formulario) ---
-        window.prepararEdicion = async (id) => {
+        // ── Cargar todos los temas ──
+        async function cargarTemas() {
             const snap = await getDocs(collection(db, "temas"));
-            const tema = snap.docs.find(d => d.id === id).data();
-
-            document.getElementById("edit-id").value = id;
-            document.getElementById("titulo").value = tema.titulo;
-            document.getElementById("artista").value = tema.artista;
-            document.getElementById("tonalidad").value = tema.tonalidad;
-            document.getElementById("videoId").value = tema.videoId;
-            document.getElementById("inicio").value = tema.inicio;
-            document.getElementById("categoria").value = tema.categoria;
-            document.getElementById("fuente").value = tema.fuente;
-
-            document.getElementById("form-title").innerText = "Editando Tema";
-            btnGuardar.innerText = "ACTUALIZAR CAMBIOS";
-            btnCancelar.style.display = "block";
-            window.scrollTo(0,0);
-        };
-
-        // --- 4. ELIMINAR ---
-        window.eliminarTema = async (id) => {
-            if(confirm("¿Seguro que quieres borrar este tema?")) {
-                await deleteDoc(doc(db, "temas", id));
-                cargarLista();
-            }
-        };
-
-        function limpiarFormulario() {
-            document.querySelectorAll("input").forEach(i => i.value = "");
-            document.getElementById("edit-id").value = "";
-            document.getElementById("form-title").innerText = "Añadir Nuevo Tema";
-            btnGuardar.innerText = "GUARDAR TEMA";
-            btnCancelar.style.display = "none";
+            allTemas = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+            renderTabla(allTemas);
         }
 
-        btnCancelar.onclick = limpiarFormulario;
+        // ── Render tabla (con filtro opcional) ──
+        function renderTabla(lista) {
+            const tbody = document.getElementById("tabla-body");
+            document.getElementById("table-count").textContent = `${lista.length} tema${lista.length !== 1 ? 's' : ''}`;
 
-        // Carga inicial
-        cargarLista();
+            if (!lista.length) {
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Sin resultados</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = lista.map(t => `
+                <tr>
+                    <td>${t.titulo || "—"}</td>
+                    <td>${t.artista || "—"}</td>
+                    <td>${t.tonalidad || "—"}</td>
+                    <td><span class="source-badge ${t.fuente === 'youtube' ? 'yt' : 'drive'}">${t.fuente}</span></td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="btn-edit-row" onclick="prepEdit('${t._id}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                                Editar
+                            </button>
+                            <button class="btn-del-row" onclick="borrar('${t._id}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                Eliminar
+                            </button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        // ── Filtro de búsqueda ──
+        document.getElementById("search-admin").addEventListener("input", e => {
+            const q = e.target.value.toLowerCase();
+            renderTabla(allTemas.filter(t =>
+                (t.titulo||"").toLowerCase().includes(q) ||
+                (t.artista||"").toLowerCase().includes(q) ||
+                (t.tonalidad||"").toLowerCase().includes(q)
+            ));
+        });
+
+        // ── Guardar / actualizar ──
+        document.getElementById("btnGuardar").onclick = async () => {
+            const btn   = document.getElementById("btnGuardar");
+            const editId = document.getElementById("edit-id").value;
+            const data  = {
+                titulo:    document.getElementById("titulo").value.trim(),
+                artista:   document.getElementById("artista").value.trim(),
+                tonalidad: document.getElementById("tonalidad").value.trim(),
+                videoId:   document.getElementById("videoId").value.trim(),
+                inicio:    parseInt(document.getElementById("inicio").value) || 0,
+                categoria: document.getElementById("categoria").value,
+                fuente:    document.getElementById("fuente").value
+            };
+            if (!data.titulo) { showStatus("El título es obligatorio.", false); return; }
+
+            btn.textContent = editId ? "Actualizando..." : "Guardando...";
+            btn.disabled = true;
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, "temas", editId), data);
+                    // Actualizar caché local
+                    const idx = allTemas.findIndex(t => t._id === editId);
+                    if (idx > -1) allTemas[idx] = { _id: editId, ...data };
+                    showStatus("✓ Tema actualizado.", true);
+                } else {
+                    const ref = await addDoc(collection(db, "temas"), data);
+                    allTemas.push({ _id: ref.id, ...data });
+                    showStatus("✓ Tema añadido.", true);
+                }
+                renderTabla(allTemas);
+                limpiar();
+            } catch (e) {
+                showStatus("Error: " + e.message, false);
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        // ── Preparar edición ──
+        window.prepEdit = async (id) => {
+            const t = allTemas.find(x => x._id === id);
+            if (!t) return;
+
+            document.getElementById("edit-id").value        = id;
+            document.getElementById("titulo").value         = t.titulo    || "";
+            document.getElementById("artista").value        = t.artista   || "";
+            document.getElementById("tonalidad").value      = t.tonalidad || "";
+            document.getElementById("videoId").value        = t.videoId   || "";
+            document.getElementById("inicio").value         = t.inicio    || 0;
+            document.getElementById("categoria").value      = t.categoria || "huayno";
+            document.getElementById("fuente").value         = t.fuente    || "youtube";
+
+            document.getElementById("form-label").textContent = "✏️ Editando tema";
+            document.getElementById("btnGuardar").innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg>
+                Actualizar cambios`;
+            document.getElementById("btnCancelar").style.display = "inline-flex";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // ── Eliminar ──
+        window.borrar = async (id) => {
+            const t = allTemas.find(x => x._id === id);
+            if (!confirm(`¿Eliminar "${t?.titulo}"?`)) return;
+            try {
+                await deleteDoc(doc(db, "temas", id));
+                allTemas = allTemas.filter(x => x._id !== id);
+                renderTabla(allTemas);
+                showStatus("✓ Eliminado.", true);
+            } catch (e) {
+                showStatus("Error al eliminar: " + e.message, false);
+            }
+        };
+
+        // ── Helpers ──
+        function limpiar() {
+            ["titulo","artista","tonalidad","videoId","inicio","edit-id"].forEach(id => {
+                document.getElementById(id).value = "";
+            });
+            document.getElementById("categoria").value = "huayno";
+            document.getElementById("fuente").value    = "youtube";
+            document.getElementById("form-label").textContent = "➕ Añadir nuevo tema";
+            document.getElementById("btnGuardar").innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Guardar tema`;
+            document.getElementById("btnCancelar").style.display = "none";
+        }
+
+        document.getElementById("btnCancelar").onclick = limpiar;
+
+        function showStatus(msg, ok) {
+            const el = document.getElementById("status-msg");
+            el.textContent = msg;
+            el.className   = ok ? "ok" : "err";
+            el.style.display = "inline-block";
+            setTimeout(() => { el.style.display = "none"; }, 3500);
+        }
     </script>
 </body>
 </html>

@@ -3,92 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Ripper</title>
-    <link rel="stylesheet" href="css/estilo.css">
+    <title>Entrar — Ripper</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root{ --bg:#0b0b0b; --card:rgba(12,12,12,0.75); --accent:#e50914; --muted:#bdbdbd }
-        html,body{ height:100vh; margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(180deg,#020202 0%, #0b0b0b 60%); color:#fff; overflow:hidden }
-        .login-wrapper{ min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; background-image: radial-gradient(ellipse at top left, rgba(230,9,20,0.05), transparent 10%); }
-        .login-box{ width:380px; background:var(--card); border-radius:14px; padding:28px 26px; box-shadow: 0 20px 50px rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.03); backdrop-filter: blur(6px); }
-        .login-box h1{ margin:0; font-size:2.6rem; letter-spacing:3px; color:var(--accent); font-weight:800; text-transform:uppercase; }
-        .login-box p.subtitle{ color:var(--muted); margin:8px 0 18px; font-size:0.95rem }
-        .input-group{ margin-bottom:12px }
-        .input-group label{ display:block; font-size:0.8rem; color:#ddd; margin-bottom:6px }
-        .login-input{ width:100%; padding:12px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(0,0,0,0.35); color:#fff; outline:none }
-        .login-input:focus{ box-shadow:0 0 12px rgba(229,9,20,0.12); border-color:rgba(229,9,20,0.6) }
-        .btn-login{ width:100%; padding:12px; background:var(--accent); border:none; color:#fff; border-radius:8px; font-weight:800; cursor:pointer; margin-top:10px }
-        .btn-login:hover{ filter:brightness(0.95) }
-        .whatsapp-section{ margin-top:16px; display:flex; flex-direction:column; gap:8px; align-items:center; text-align:center }
-        .whatsapp-text{ color:var(--muted); font-size:0.95rem; max-width:320px }
-        .btn-whatsapp{ background:#25D366; color:#fff; padding:8px 14px; border-radius:20px; text-decoration:none; font-weight:700; white-space:nowrap }
-        .error-text{ display:none; margin-bottom:10px; background:rgba(255,77,77,0.08); color:#ffb3b3; padding:8px; border-radius:6px }
-        footer{ text-align:center; margin-top:18px; color:#888; font-size:0.85rem }
-        @media(max-width:420px){ body{ overflow:auto } .login-box{ width:100%; padding:20px } .login-box h1{ font-size:2rem } }
+        :root {
+            --red: #e50914; --red-glow: rgba(229,9,20,0.4);
+            --bg:  #080808; --surface: rgba(12,12,12,0.82);
+            --border: rgba(255,255,255,0.07);
+            --muted: #bdbdbd;
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-body:    'Outfit', sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100vh; font-family: var(--font-body); background: var(--bg); color: #fff; overflow: hidden; }
+
+        /* Grain */
+        body::after {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.3;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+        }
+
+        .page {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 32px 20px;
+            background-image: radial-gradient(ellipse at 20% 20%, rgba(229,9,20,0.04), transparent 50%);
+        }
+
+        .box {
+            width: 100%; max-width: 380px;
+            background: var(--surface); border-radius: 14px;
+            padding: 30px 28px; border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+        }
+
+        .brand {
+            font-family: var(--font-display); font-size: 2.6rem;
+            letter-spacing: 0.2em; color: var(--red);
+            text-shadow: 0 0 28px var(--red-glow);
+            display: block; margin-bottom: 4px;
+        }
+        .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+
+        .error-text {
+            display: none; color: #ffb3b3;
+            background: rgba(255,77,77,0.08); padding: 9px 12px;
+            border-radius: 7px; font-size: 0.83rem; margin-bottom: 12px;
+        }
+
+        .field       { margin-bottom: 12px; }
+        .field label { display: block; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #ccc; margin-bottom: 6px; }
+        .login-input {
+            width: 100%; padding: 11px 13px; border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.4);
+            color: #fff; font-family: var(--font-body); font-size: 0.9rem; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .login-input:focus {
+            border-color: rgba(229,9,20,0.6);
+            box-shadow: 0 0 0 3px rgba(229,9,20,0.1);
+        }
+
+        .btn-login {
+            width: 100%; margin-top: 14px; padding: 12px;
+            background: var(--red); border: none; color: white;
+            border-radius: 7px; font-weight: 700; font-family: var(--font-body);
+            font-size: 0.9rem; cursor: pointer; letter-spacing: 0.06em;
+            transition: filter 0.2s, transform 0.1s;
+        }
+        .btn-login:hover  { filter: brightness(1.1); }
+        .btn-login:active { transform: scale(0.98); }
+
+        .wa-section { margin-top: 18px; text-align: center; }
+        .wa-text     { color: #888; font-size: 0.82rem; margin-bottom: 10px; }
+        .btn-whatsapp {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: #25D366; color: white; padding: 9px 16px;
+            border-radius: 20px; text-decoration: none; font-weight: 700; font-size: 0.85rem;
+        }
+
+        footer { margin-top: 20px; color: #555; font-size: 0.8rem; letter-spacing: 0.08em; }
+
+        @media (max-width: 420px) {
+            body { overflow: auto; }
+            .box { padding: 22px 18px; }
+            .brand { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
+    <div class="page">
+        <div class="box">
+            <span class="brand">RIPPER</span>
+            <p class="subtitle">Partituras, audios y más</p>
 
-    <div class="login-wrapper">
-        <div class="login-box">
-            <h1>RIPPER</h1>
-            <p class="subtitle">Partituras, audios de canciones y más</p>
-            
             <div id="error-msg" class="error-text"></div>
 
-            <div class="input-group">
+            <div class="field">
                 <label>Correo electrónico</label>
                 <input type="email" id="email" placeholder="ejemplo@correo.com" class="login-input">
             </div>
-
-            <div class="input-group">
+            <div class="field">
                 <label>Contraseña</label>
                 <input type="password" id="password" placeholder="••••••••" class="login-input">
             </div>
-            
+
             <button id="btnLogin" class="btn-login">ENTRAR</button>
-            
-            <div class="whatsapp-section">
-                <p class="whatsapp-text">¿No tienes cuenta? Contáctame por WhatsApp</p>
+
+            <div class="wa-section">
+                <p class="wa-text">¿No tienes cuenta? Contáctame</p>
                 <a href="https://wa.me/51933287274" target="_blank" class="btn-whatsapp">
-                    <i class="fab fa-whatsapp"></i> Haz clic aquí
+                    <i class="fab fa-whatsapp"></i> WhatsApp
                 </a>
             </div>
         </div>
 
-        <footer>
-            HECHO POR <span style="color: #666;">RENZO CHAVARRIA</span>
-        </footer>
+        <footer>HECHO POR RENZO CHAVARRIA</footer>
     </div>
 
     <script type="module">
         import { auth } from "./firebase.js";
         import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const btnLogin = document.getElementById("btnLogin");
-        const errorMsg = document.getElementById("error-msg");
+        const btn = document.getElementById("btnLogin");
+        const err = document.getElementById("error-msg");
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) { window.location.replace("home.html"); }
-        });
+        onAuthStateChanged(auth, user => { if (user) window.location.replace("home.html"); });
 
-        btnLogin.onclick = async () => {
+        btn.onclick = async () => {
             const email = document.getElementById("email").value;
-            const pass = document.getElementById("password").value;
-
-            if(!email || !pass) return;
-
-            btnLogin.innerText = "VERIFICANDO...";
-            errorMsg.style.display = "none";
-
+            const pass  = document.getElementById("password").value;
+            if (!email || !pass) return;
+            btn.textContent = "VERIFICANDO...";
+            err.style.display = "none";
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
-            } catch (error) {
-                btnLogin.innerText = "ENTRAR";
-                errorMsg.style.display = "block";
-                errorMsg.innerText = "Acceso denegado. Verifica tus datos.";
+            } catch {
+                btn.textContent = "ENTRAR";
+                err.textContent = "Acceso denegado. Verifica tus datos.";
+                err.style.display = "block";
             }
         };
+
+        // Enter key
+        document.addEventListener("keydown", e => { if (e.key === "Enter") btn.click(); });
     </script>
 </body>
 </html>

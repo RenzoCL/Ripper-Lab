@@ -3,126 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Explorar Temas - Ripper Lab</title>
+    <title>Explorar Temas — Ripper</title>
     <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
     <div id="lista-wrapper">
+
+        <!-- ══ HEADER ══ -->
         <header class="site-header">
             <div class="header-inner">
-                <a href="home.html" class="btn-nav" style="margin:0;">⬅ Volver</a>
-                <a href="home.html" class="logo" style="text-decoration:none; flex:1; text-align:center;">RIPPER</a>
-                <button id="btnLogOut" class="btn-nav btn-logout" style="margin:0;">Cerrar Sesión</button>
+                <div class="col-left">
+                    <a href="home.html" class="btn-nav">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        <span>Volver</span>
+                    </a>
+                </div>
+                <div class="col-mid">
+                    <a href="home.html" class="logo">RIPPER</a>
+                </div>
+                <div class="col-right">
+                    <button id="btnLogOut" class="btn-nav btn-logout">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </div>
             </div>
         </header>
 
         <input type="text" id="buscador" class="buscador" placeholder="🔎 Buscar por título o artista...">
 
         <div class="container">
-            <div id="lista" class="grid-huaynos">
-                </div>
+            <div id="lista" class="grid-huaynos"></div>
         </div>
+
     </div>
 
     <script type="module">
         import { auth, db } from "./firebase.js";
         import { vigilarSesion, globalLogout } from "./js/seguridad.js";
-        // Añadimos 'query' y 'where' para filtrar en la nube
         import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         vigilarSesion(auth, db, "lista-wrapper");
-
-        const params = new URLSearchParams(window.location.search);
-        const catActual = params.get('cat') || 'huayno';
-        
-        // Botón de cerrar sesión
         document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
 
-        const listaDiv = document.getElementById("lista");
-        const buscador = document.getElementById("buscador");
+        const params    = new URLSearchParams(window.location.search);
+        const catActual = params.get('cat') || 'huayno';
+        const listaDiv  = document.getElementById("lista");
+        const buscador  = document.getElementById("buscador");
 
-        const normalizarTexto = (texto) => {
-            return texto ? texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
-        };
+        const normalizar = t => t ? t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase() : "";
 
-        async function render(filtro = "") {
-            if (!listaDiv) return;
+        const ORDEN_NOTAS = { do:1, re:2, mi:3, fa:4, sol:5, la:6, si:7 };
 
-            // 1. Mostrar estado de carga solo si es la primera vez
-            if (!filtro && listaDiv.innerHTML === "") {
-                listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#888; padding:50px;">Cargando repertorio...</p>`;
-            }
+        let temasCache = [];
 
+        async function cargarTemas() {
+            listaDiv.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#666;padding:50px 0;">Cargando repertorio...</p>`;
             try {
-                // 2. CONSULTA OPTIMIZADA: Filtramos por categoría en el servidor
-                // Esto reduce drásticamente el tiempo de descarga
-                const q = query(
-                    collection(db, "temas"), 
-                    where("categoria", "==", catActual)
-                );
-
-                // getDocs usará la caché automáticamente si está disponible
-                const querySnapshot = await getDocs(q);
-                const temasFirebase = [];
-                
-                querySnapshot.forEach((doc) => {
-                    temasFirebase.push({ id: doc.id, ...doc.data() });
-                });
-
-                // 3. Lógica de filtrado por buscador y ordenado (Local)
-                const ordenNotas = { "do": 1, "re": 2, "mi": 3, "fa": 4, "sol": 5, "la": 6, "si": 7 };
-                const textoBusqueda = normalizarTexto(filtro);
-
-                const temasFiltrados = temasFirebase
-                    .filter(t => {
-                        const titulo = normalizarTexto(t.titulo);
-                        const artista = normalizarTexto(t.artista);
-                        return titulo.includes(textoBusqueda) || artista.includes(textoBusqueda);
-                    })
-                    .sort((a, b) => {
-                        const notaA = (a.tonalidad || "").toLowerCase().split(" ")[0];
-                        const notaB = (b.tonalidad || "").toLowerCase().split(" ")[0];
-                        const modoA = (a.tonalidad || "").toLowerCase().includes("menor") ? "menor" : "mayor";
-                        const modoB = (b.tonalidad || "").toLowerCase().includes("menor") ? "menor" : "mayor";
-
-                        if (ordenNotas[notaA] !== ordenNotas[notaB]) {
-                            return (ordenNotas[notaA] || 99) - (ordenNotas[notaB] || 99);
-                        }
-                        if (modoA !== modoB) return modoA === "mayor" ? -1 : 1; 
-                        return (a.titulo || "").localeCompare(b.titulo || "");
-                    });
-
-                // 4. DIBUJAR (Solo si hay cambios para evitar parpadeos)
-                listaDiv.innerHTML = "";
-
-                if (temasFiltrados.length === 0) {
-                    listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#666; padding:50px;">No hay temas aquí.</p>`;
-                    return;
-                }
-
-                temasFiltrados.forEach(t => {
-                    const card = document.createElement("a");
-                    card.href = `reproductor.html?id=${t.id}`;
-                    const claseColor = (t.tonalidad || "").toLowerCase().trim().replace(/\s+/g, '-');
-                    card.className = `card ${claseColor}`;
-                    card.innerHTML = `
-                        <div style="display:flex; flex-direction:column;">
-                            <span class="titulo">${t.titulo || 'Sin título'}</span>
-                            <span style="font-size:0.7rem; color:#888;">${t.artista || 'Artista'}</span>
-                        </div>
-                        <span class="tono-tag">${t.tonalidad || '--'}</span>
-                    `;
-                    listaDiv.appendChild(card);
-                });
-
-            } catch (error) {
-                console.error("Error:", error);
-                listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#ff4d4d; padding:50px;">Error de conexión.</p>`;
+                const snap = await getDocs(query(collection(db, "temas"), where("categoria", "==", catActual)));
+                temasCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderFiltrado();
+            } catch (e) {
+                console.error(e);
+                listaDiv.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#e55;padding:50px 0;">Error de conexión.</p>`;
             }
         }
 
-        buscador.addEventListener("input", (e) => render(e.target.value));
-        render();
+        function renderFiltrado(filtro = "") {
+            const txt = normalizar(filtro);
+
+            const filtrados = temasCache
+                .filter(t => normalizar(t.titulo).includes(txt) || normalizar(t.artista).includes(txt))
+                .sort((a, b) => {
+                    const nA = (a.tonalidad||"").toLowerCase().split(" ")[0];
+                    const nB = (b.tonalidad||"").toLowerCase().split(" ")[0];
+                    const mA = (a.tonalidad||"").toLowerCase().includes("menor") ? 1 : 0;
+                    const mB = (b.tonalidad||"").toLowerCase().includes("menor") ? 1 : 0;
+                    const diff = (ORDEN_NOTAS[nA]||99) - (ORDEN_NOTAS[nB]||99);
+                    if (diff !== 0) return diff;
+                    if (mA !== mB) return mA - mB;
+                    return (a.titulo||"").localeCompare(b.titulo||"");
+                });
+
+            if (!filtrados.length) {
+                listaDiv.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#555;padding:50px 0;">No hay temas aquí.</p>`;
+                return;
+            }
+
+            listaDiv.innerHTML = "";
+            filtrados.forEach(t => {
+                const a = document.createElement("a");
+                a.href = `reproductor.html?id=${t.id}&cat=${catActual}`;
+                a.className = `card tema-card ${(t.tonalidad||"").toLowerCase().trim().replace(/\s+/g,"-")}`;
+                a.innerHTML = `
+                    <div>
+                        <span class="titulo">${t.titulo||"Sin título"}</span>
+                        <div class="artista-sub">${t.artista||"Artista"}</div>
+                    </div>
+                    <span class="tono-tag">${t.tonalidad||"--"}</span>`;
+                listaDiv.appendChild(a);
+            });
+        }
+
+        buscador.addEventListener("input", e => renderFiltrado(e.target.value));
+        cargarTemas();
     </script>
 </body>
 </html>
