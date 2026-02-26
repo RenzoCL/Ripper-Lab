@@ -6,7 +6,6 @@
     <title>Reproductor — Ripper</title>
     <link rel="stylesheet" href="css/estilo.css">
     <style>
-        /* ── PAGE BODY ── */
         .page-body {
             padding: calc(var(--header-height) + 20px) 20px 50px;
             max-width: 860px; margin: 0 auto;
@@ -14,7 +13,7 @@
         }
         @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 
-        /* ── TITLE AREA ── */
+        /* ── TITLE ── */
         .label-tag {
             display: inline-flex; align-items: center; gap: 6px;
             background: var(--red); color: white;
@@ -44,7 +43,7 @@
             padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em;
         }
 
-        /* ── PLAYER ── */
+        /* ── PLAYER WRAPPER ── */
         .player-wrapper {
             border-radius: 12px; overflow: hidden;
             box-shadow: 0 0 0 1px var(--border), 0 24px 60px rgba(0,0,0,0.7), 0 0 50px rgba(229,9,20,0.06);
@@ -70,42 +69,53 @@
         @keyframes spin { to{transform:rotate(360deg)} }
         .loader-text { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: #444; }
 
-        /* ── YOUTUBE: overlay que fuerza usar el botón de abajo ── */
+        /* ══════════════════════════════════════════════
+           OVERLAY YOUTUBE
+           - Cubre todo el video → absorbe clics
+           - Texto grande y legible
+           - Se oculta al reproducir, reaparece al pausar
+        ══════════════════════════════════════════════ */
         #yt-overlay {
             position: absolute; inset: 0;
-            background: radial-gradient(ellipse at center, rgba(229,9,20,0.05) 0%, rgba(0,0,0,0.8) 100%);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 20; display: none;
-            flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-            /* Absorbe clics — no permite interacción directa con el video */
-            pointer-events: all; cursor: default;
+            flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+            pointer-events: all;  /* ← absorbe TODOS los clics */
+            cursor: default;
         }
-        .yt-overlay-hint {
-            font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
-            color: rgba(255,255,255,0.4);
+        .overlay-icon { font-size: 3.5rem; line-height: 1; }
+        .overlay-title {
+            font-family: var(--font-display);
+            font-size: 1.6rem; letter-spacing: 0.08em;
+            color: #ffffff; text-align: center;
         }
-        .yt-overlay-arrow {
-            font-size: 1.5rem; color: var(--red);
-            animation: bounce 0.9s ease-in-out infinite;
+        .overlay-sub {
+            font-size: 0.9rem; color: rgba(255,255,255,0.7);
+            text-align: center; max-width: 280px; line-height: 1.5;
         }
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+        .overlay-arrow {
+            font-size: 2.2rem; color: var(--red);
+            animation: bounce 0.85s ease-in-out infinite;
+            margin-top: 4px;
+        }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(10px)} }
 
-        /* ── DRIVE: bloquea solo la esquina de "abrir externamente" ── */
-        .capa-esquina-drive {
-            position: absolute; top: 0; right: 0;
-            width: 100px; height: 70px;
-            z-index: 15; display: none;
-            background: transparent; pointer-events: all; cursor: not-allowed;
-        }
-
-        /* Bloqueo total YT */
+        /* Bloqueo total del iframe YT */
         .capa-full {
             position: absolute; inset: 0; z-index: 10; display: none;
             background: transparent; pointer-events: all; cursor: default;
         }
+        /* Bloqueo solo esquina superior derecha de Drive (botón "abrir externamente") */
+        .capa-esquina-drive {
+            position: absolute; top: 0; right: 0;
+            width: 110px; height: 75px;
+            z-index: 15; display: none;
+            background: transparent; pointer-events: all; cursor: not-allowed;
+        }
 
         #player, #player iframe { width: 100% !important; height: 100% !important; border: none; }
 
-        /* ── CONTROLS PANEL (solo YouTube) ── */
+        /* ── CONTROLS (solo YouTube) ── */
         .controls-panel {
             background: var(--surface); border: 1px solid var(--border); border-top: none;
             border-radius: 0 0 12px 12px; padding: 16px 20px;
@@ -113,7 +123,7 @@
         }
 
         .progress-track { width: 100%; height: 3px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
-        .progress-fill  { height: 100%; width: 0%; background: linear-gradient(90deg,var(--red),#ff4d4d); border-radius: 10px; transition: width 0.5s linear; }
+        .progress-fill  { height: 100%; width: 0%; background: linear-gradient(90deg, var(--red), #ff4d4d); border-radius: 10px; transition: width 0.5s linear; }
 
         .controls-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; }
 
@@ -158,7 +168,6 @@
         .btn-restart:hover { color: white; border-color: var(--border2); }
         .btn-restart svg { width: 12px; height: 12px; }
 
-        /* Drive notice */
         .drive-notice {
             display: none; margin-top: 12px; padding: 10px 14px;
             background: rgba(255,255,255,0.03); border: 1px solid var(--border);
@@ -169,6 +178,7 @@
             .page-body { padding-left: 12px; padding-right: 12px; }
             .btn-seek  { width: 34px; height: 34px; font-size: 0.62rem; }
             #btn-play  { width: 52px; height: 52px; }
+            .overlay-title { font-size: 1.3rem; }
         }
     </style>
 </head>
@@ -219,14 +229,16 @@
                 <div id="player"></div>
 
                 <!--
-                    YT OVERLAY: solo aparece para YouTube.
-                    pointer-events:all → absorbe todos los clics al video.
-                    El usuario DEBE usar el botón PLAY de abajo.
+                    OVERLAY YOUTUBE:
+                    • pointer-events:all → BLOQUEA todos los clics al video
+                    • Solo se oculta cuando el video está REALMENTE reproduciendo
+                    • Texto grande y visible para guiar al usuario
                 -->
                 <div id="yt-overlay">
-                    <span style="font-size:2rem; opacity:0.4;">⏸</span>
-                    <span class="yt-overlay-hint">Usa el botón de abajo</span>
-                    <span class="yt-overlay-arrow">▼</span>
+                    <span class="overlay-icon">🎵</span>
+                    <span class="overlay-title">PRESIONA PLAY</span>
+                    <span class="overlay-sub">Usa el botón rojo de abajo para reproducir</span>
+                    <span class="overlay-arrow">▼</span>
                 </div>
 
                 <!-- Loading -->
@@ -235,14 +247,14 @@
                     <p class="loader-text">Obteniendo video</p>
                 </div>
 
-                <!-- YT: capa que bloquea el iframe completo -->
+                <!-- Bloqueo total del iframe YouTube -->
                 <div id="capa-yt" class="capa-full"></div>
 
-                <!-- Drive: solo bloquea la esquina superior derecha (botón de abrir externamente) -->
+                <!-- Solo bloquea esquina sup. derecha de Drive (botón "abrir externamente") -->
                 <div id="capa-drive-corner" class="capa-esquina-drive"></div>
             </div>
 
-            <!-- Panel de controles: solo visible para YouTube -->
+            <!-- Panel controles YouTube -->
             <div id="panel-controles" class="controls-panel">
                 <div class="progress-track">
                     <div class="progress-fill" id="progress-fill"></div>
@@ -276,7 +288,7 @@
         </div>
 
         <p class="drive-notice" id="aviso-drive">
-            ▶ Usa los controles del reproductor de arriba. El botón de "abrir externamente" está deshabilitado.
+            ▶ Usa los controles del reproductor. El botón "abrir externamente" está deshabilitado.
         </p>
 
     </div>
@@ -286,20 +298,20 @@
         import { vigilarSesion, globalLogout } from "./js/seguridad.js";
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        vigilarSesion(auth, db, "page-body"); // Nota: el div con este id es .page-body
+        vigilarSesion(auth, db, "page-body");
         document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
 
         const params   = new URLSearchParams(window.location.search);
         const idTema   = params.get('id');
         const catParam = params.get('cat') || 'huayno';
-
         document.getElementById('btn-volver').href = `lista-temas.html?cat=${catParam}`;
 
         window.player = null;
-        let isYouTube = false;
-        let playing   = false;
-        let inicio    = 0;
-        let temaData  = null;
+        let isYouTube    = false;
+        let playing      = false;
+        let inicio       = 0;
+        let temaData     = null;
+        let ignorarPausa = false; // ← evita que cambiar de pestaña muestre el overlay
 
         async function init() {
             if (!idTema) return;
@@ -311,12 +323,11 @@
                     return;
                 }
                 temaData = snap.data();
-                document.getElementById('txt-titulo').textContent = temaData.titulo   || "Sin título";
-                document.getElementById('txt-banda').textContent  = temaData.artista  || "Artista";
+                document.getElementById('txt-titulo').textContent = temaData.titulo    || "Sin título";
+                document.getElementById('txt-banda').textContent  = temaData.artista   || "Artista";
                 document.getElementById('txt-tono').textContent   = temaData.tonalidad || "--";
                 inicio = temaData.inicio || 0;
 
-                // Cargar siempre la API de YouTube (needed both for YT and as trigger)
                 const s = document.createElement('script');
                 s.src = "https://www.youtube.com/iframe_api";
                 document.head.appendChild(s);
@@ -325,27 +336,49 @@
 
         window.onYouTubeIframeAPIReady = function() {
             if (temaData.fuente === "youtube") {
-                // ── YOUTUBE: forzar play desde nuestro botón ──
+                // ── YOUTUBE ──
                 isYouTube = true;
                 document.getElementById('panel-controles').style.display = 'flex';
-                document.getElementById('capa-yt').style.display = 'block';  // Bloqueo total del iframe
+                document.getElementById('capa-yt').style.display = 'block';
 
                 window.player = new YT.Player('player', {
                     height: '100%', width: '100%',
                     videoId: temaData.videoId,
-                    playerVars: { start: inicio, controls: 0, modestbranding: 1, rel: 0, disablekb: 1 },
+                    playerVars: {
+                        start: inicio,
+                        controls: 0,       // ocultamos controles nativos YT
+                        modestbranding: 1,
+                        rel: 0,
+                        disablekb: 1,
+                        // ── CLAVE: permite reproducción en background ──
+                        playsinline: 1
+                    },
                     events: {
                         onReady: () => {
                             document.getElementById('loading-screen').style.display = 'none';
-                            // Mostrar overlay que guía al botón
                             document.getElementById('yt-overlay').style.display = 'flex';
                         },
                         onStateChange: ytStateChange
                     }
                 });
 
+                // ── CLAVE: cuando el usuario vuelve a la pestaña, NO mostrar overlay ──
+                // El video puede haberse pausado por el navegador al cambiar de pestaña;
+                // lo reanudamos automáticamente.
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible' && isYouTube && window.player) {
+                        // Si estaba reproduciendo antes de salir, reanudar
+                        if (playing) {
+                            ignorarPausa = true;
+                            setTimeout(() => { ignorarPausa = false; }, 2000);
+                            window.player.playVideo();
+                        }
+                    }
+                });
+
             } else {
-                // ── GOOGLE DRIVE: controles nativos OK, solo bloquear esquina de "abrir externamente" ──
+                // ── GOOGLE DRIVE: controles nativos libres ──
+                // Solo bloqueamos la esquina de "abrir externamente"
                 document.getElementById('capa-drive-corner').style.display = 'block';
                 document.getElementById('aviso-drive').style.display = 'block';
 
@@ -360,14 +393,26 @@
 
         function ytStateChange(e) {
             const btn = document.getElementById('btn-play');
+
             if (e.data === YT.PlayerState.PLAYING) {
-                btn.classList.add('playing'); playing = true;
+                btn.classList.add('playing');
+                playing = true;
+                ignorarPausa = false;
                 document.getElementById('yt-overlay').style.display = 'none';
-            } else {
-                btn.classList.remove('playing'); playing = false;
-                if (e.data === YT.PlayerState.PAUSED) {
+
+            } else if (e.data === YT.PlayerState.PAUSED) {
+                btn.classList.remove('playing');
+                playing = false;
+
+                // Solo mostrar overlay si NO fue una pausa por cambio de pestaña
+                if (!ignorarPausa) {
                     document.getElementById('yt-overlay').style.display = 'flex';
                 }
+
+            } else if (e.data === YT.PlayerState.ENDED) {
+                btn.classList.remove('playing');
+                playing = false;
+                document.getElementById('yt-overlay').style.display = 'flex';
             }
         }
 
