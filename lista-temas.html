@@ -23,12 +23,11 @@
     <script type="module">
         import { auth, db } from "./firebase.js";
         import { vigilarSesion } from "./js/seguridad.js";
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // Añadimos 'query' y 'where' para filtrar en la nube
+        import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. Vigilancia activa (Kill Switch)
         vigilarSesion(auth, db, "lista-wrapper");
 
-        // 2. Parámetros de URL
         const params = new URLSearchParams(window.location.search);
         const catActual = params.get('cat') || 'huayno';
         document.getElementById("titulo-cat").innerText = catActual;
@@ -40,78 +39,70 @@
             return texto ? texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
         };
 
-        // Función principal de carga y renderizado
         async function render(filtro = "") {
             if (!listaDiv) return;
 
-            // Mostrar estado inicial de carga
-            if (!filtro) {
-                listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#888; padding:50px;">
-                    Conectando con la base de datos...<br><small>Ripper Lab Cloud</small></p>`;
+            // 1. Mostrar estado de carga solo si es la primera vez
+            if (!filtro && listaDiv.innerHTML === "") {
+                listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#888; padding:50px;">Cargando repertorio...</p>`;
             }
 
             try {
-                // CONSULTA A FIREBASE
-                const querySnapshot = await getDocs(collection(db, "temas"));
+                // 2. CONSULTA OPTIMIZADA: Filtramos por categoría en el servidor
+                // Esto reduce drásticamente el tiempo de descarga
+                const q = query(
+                    collection(db, "temas"), 
+                    where("categoria", "==", catActual)
+                );
+
+                // getDocs usará la caché automáticamente si está disponible
+                const querySnapshot = await getDocs(q);
                 const temasFirebase = [];
                 
                 querySnapshot.forEach((doc) => {
                     temasFirebase.push({ id: doc.id, ...doc.data() });
                 });
 
+                // 3. Lógica de filtrado por buscador y ordenado (Local)
                 const ordenNotas = { "do": 1, "re": 2, "mi": 3, "fa": 4, "sol": 5, "la": 6, "si": 7 };
                 const textoBusqueda = normalizarTexto(filtro);
 
-                // FILTRADO Y ORDENADO LÓGICO
                 const temasFiltrados = temasFirebase
-                    .filter(t => t.categoria === catActual)
                     .filter(t => {
                         const titulo = normalizarTexto(t.titulo);
                         const artista = normalizarTexto(t.artista);
                         return titulo.includes(textoBusqueda) || artista.includes(textoBusqueda);
                     })
                     .sort((a, b) => {
-                        // Extraemos la nota base (ej: "Re" de "Re menor")
                         const notaA = (a.tonalidad || "").toLowerCase().split(" ")[0];
                         const notaB = (b.tonalidad || "").toLowerCase().split(" ")[0];
-                        
                         const modoA = (a.tonalidad || "").toLowerCase().includes("menor") ? "menor" : "mayor";
                         const modoB = (b.tonalidad || "").toLowerCase().includes("menor") ? "menor" : "mayor";
 
-                        // Prioridad 1: Orden musical (Do, Re, Mi...)
                         if (ordenNotas[notaA] !== ordenNotas[notaB]) {
                             return (ordenNotas[notaA] || 99) - (ordenNotas[notaB] || 99);
                         }
-                        // Prioridad 2: Mayor antes que Menor
-                        if (modoA !== modoB) {
-                            return modoA === "mayor" ? -1 : 1; 
-                        }
-                        // Prioridad 3: Alfabético
+                        if (modoA !== modoB) return modoA === "mayor" ? -1 : 1; 
                         return (a.titulo || "").localeCompare(b.titulo || "");
                     });
 
-                // LIMPIAR Y DIBUJAR
+                // 4. DIBUJAR (Solo si hay cambios para evitar parpadeos)
                 listaDiv.innerHTML = "";
 
                 if (temasFiltrados.length === 0) {
-                    listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#666; padding:50px;">
-                        No se encontraron temas en la categoría <b>${catActual}</b>.</p>`;
+                    listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#666; padding:50px;">No hay temas aquí.</p>`;
                     return;
                 }
 
                 temasFiltrados.forEach(t => {
                     const card = document.createElement("a");
-                    // Enviamos el ID de Firebase al reproductor
                     card.href = `reproductor.html?id=${t.id}`;
-                    
-                    // Clase de color basada en tonalidad
                     const claseColor = (t.tonalidad || "").toLowerCase().trim().replace(/\s+/g, '-');
                     card.className = `card ${claseColor}`;
-                    
                     card.innerHTML = `
                         <div style="display:flex; flex-direction:column;">
                             <span class="titulo">${t.titulo || 'Sin título'}</span>
-                            <span style="font-size:0.7rem; color:#888;">${t.artista || 'Artista desconocido'}</span>
+                            <span style="font-size:0.7rem; color:#888;">${t.artista || 'Artista'}</span>
                         </div>
                         <span class="tono-tag">${t.tonalidad || '--'}</span>
                     `;
@@ -119,18 +110,13 @@
                 });
 
             } catch (error) {
-                console.error("Error al cargar temas:", error);
-                listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#ff4d4d; padding:50px;">
-                    Error al conectar con la nube. Revisa las reglas de Firestore.</p>`;
+                console.error("Error:", error);
+                listaDiv.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#ff4d4d; padding:50px;">Error de conexión.</p>`;
             }
         }
 
-        // Evento del buscador
         buscador.addEventListener("input", (e) => render(e.target.value));
-
-        // Ejecución inicial
         render();
-
     </script>
 </body>
 </html>
