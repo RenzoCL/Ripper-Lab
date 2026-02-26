@@ -260,9 +260,10 @@
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
                 <div class="controls-row">
-                    <button class="btn-seek" onclick="seek(-10)">−10s</button>
-                    <button class="btn-seek" onclick="seek(-5)">−5s</button>
+
                     <button class="btn-seek" onclick="seek(-1)">−1s</button>
+                    <button class="btn-seek" onclick="seek(-5)">−5s</button>
+                    <button class="btn-seek" onclick="seek(-10)">−10s</button>
 
                     <button id="btn-play" onclick="togglePlay()">
                         <svg class="icon-play"  viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -270,11 +271,11 @@
                             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                         </svg>
                     </button>
-
-                    <button class="btn-seek" onclick="seek(1)">+1s</button>
-                    <button class="btn-seek" onclick="seek(5)">+5s</button>
+                    
                     <button class="btn-seek" onclick="seek(10)">+10s</button>
-
+                    <button class="btn-seek" onclick="seek(5)">+5s</button>
+                    <button class="btn-seek" onclick="seek(1)">+1s</button>
+                                        
                     <div class="sep"></div>
 
                     <button class="btn-restart" onclick="reiniciar()">
