@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Migrador de Temas - Ripper Lab</title>
+    <style>
+        body { background: #0f0f0f; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
+        #log { background: #1a1a1a; padding: 20px; border-radius: 10px; max-width: 600px; margin: 20px auto; text-align: left; height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; }
+        button { background: #e63946; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #555; }
+    </style>
+</head>
+<body>
+    <h1>Migrador Ripper Lab</h1>
+    <p>Este script pasará los temas de <b>temas.js</b> a <b>Firebase Firestore</b>.</p>
+    
+    <button id="btnMigrar">INICIAR MIGRACIÓN</button>
+    
+    <div id="log">Esperando inicio...</div>
+
+    <script type="module">
+        import { db } from "./firebase.js";
+        import { baseDeTemas } from "./js/temas.js";
+        import { collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const btn = document.getElementById("btnMigrar");
+        const log = document.getElementById("log");
+
+        btn.onclick = async () => {
+            btn.disabled = true;
+            log.innerHTML = "Iniciando migración...<br>";
+
+            const ids = Object.keys(baseDeTemas);
+            let contador = 0;
+
+            for (const id of ids) {
+                const datos = baseDeTemas[id];
+                
+                try {
+                    // Usamos setDoc con el ID original para mantener la referencia
+                    await setDoc(doc(db, "temas", id), {
+                        titulo: datos.titulo || "Sin título",
+                        artista: datos.artista || "Sin artista",
+                        tonalidad: datos.tonalidad || "--",
+                        videoId: datos.videoId || "",
+                        inicio: datos.inicio || 0,
+                        categoria: datos.categoria || "huayno",
+                        fuente: datos.fuente || "youtube"
+                    });
+                    
+                    contador++;
+                    log.innerHTML += `<span style="color:lightgreen">✅ Migrado: ${datos.titulo}</span><br>`;
+                    log.scrollTop = log.scrollHeight;
+                } catch (e) {
+                    log.innerHTML += `<span style="color:red">❌ Error en ${id}: ${e.message}</span><br>`;
+                }
+            }
+
+            log.innerHTML += `<br><b>MIGRACIÓN FINALIZADA. ${contador} temas subidos.</b>`;
+            alert("Proceso terminado");
+        };
+    </script>
+</body>
+</html>
