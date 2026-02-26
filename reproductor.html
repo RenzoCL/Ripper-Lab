@@ -155,11 +155,13 @@
 
     <div id="panel-controles" class="controles-panel">
         <div class="botones-row">
+            <button class="btn-salto" onclick="seek(-5)">-5s</button>
             <button class="btn-salto" onclick="seek(-10)">-10s</button>
             <button id="btn-play" onclick="togglePlay()">PLAY</button>
+            <button class="btn-salto" onclick="seek(5)">+5s</button>
             <button class="btn-salto" onclick="seek(10)">+10s</button>
         </div>
-        <button style="background:none; border:none; color:#555; cursor:pointer; font-size:0.7rem;" onclick="reiniciar()">REINICIAR DESDE MARCA</button>
+        <button style="background: #222; border: 3px solid #333; color:#555; cursor:pointer; font-size:0.7rem;" onclick="reiniciar()">REINICIAR DESDE MARCA</button>
     </div>
 
     <p id="aviso-drive">⬆️⬆️ Usa los controles integrados para este video. ⬆️⬆️</p>
