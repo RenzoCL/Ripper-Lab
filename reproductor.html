@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor Ripper - Pro</title>
+    <title>Reproductor Ripper Lab</title>
     <style>
         :root {
-            --primary: #ff0000;
+            --primary: #e63946;
             --bg: #0f0f0f;
             --card: #1a1a1a;
             --text: #ffffff;
@@ -15,7 +15,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -23,7 +23,6 @@
             padding: 20px;
         }
 
-        /* Botón Volver */
         .btn-volver {
             align-self: flex-start;
             background: none;
@@ -34,14 +33,16 @@
             cursor: pointer;
             margin-bottom: 20px;
             transition: 0.3s;
+            text-decoration: none;
+            font-size: 0.9rem;
         }
         .btn-volver:hover { color: white; border-color: white; }
 
         .header-info { text-align: center; margin-bottom: 20px; }
-        .header-info h1 { color: var(--primary); margin: 5px 0; font-size: 1.6rem; }
+        .header-info h1 { color: var(--primary); margin: 5px 0; font-size: 1.6rem; text-transform: uppercase; }
         .header-info p { margin: 2px 0; opacity: 0.8; }
 
-        /* CONTENEDOR DE VIDEO DINÁMICO */
+        /* CONTENEDOR DE VIDEO */
         #video-container {
             width: 100%;
             max-width: 640px;
@@ -53,127 +54,81 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* --- NUEVOS ESTILOS DE CARGA Y AVISO --- */
+        /* Pantallas de Carga y Avisos */
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
             border-left-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        #loading-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 30; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
         #aviso-play-pantalla {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 25;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 25; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer;
         }
 
-        .flecha-animada {
-            font-size: 2.5rem;
-            color: var(--primary);
-            animation: rebote 1s infinite;
-            margin-top: 15px;
-        }
-        @keyframes rebote {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(15px); }
-        }
-        /* -------------------------------------- */
+        /* Bloqueos para evitar clics externos */
+        .capa-full { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: none; }
+        .capa-esquina-drive { position: absolute; top: 0; right: 0; width: 80px; height: 60px; z-index: 10; display: none; }
 
-        .capa-full {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; display: none;
-        }
-        .capa-esquina-drive {
-            position: absolute; top: 0; right: 0; width: 80px; height: 60px;
-            z-index: 10; display: none; background: rgba(0,0,0,0);
-        }
+        #player, iframe { width: 100% !important; height: 100% !important; border: none; }
 
-        #player, iframe {
-            width: 100% !important;
-            height: 100% !important;
-            border: none;
-            display: block;
-        }
-
+        /* PANEL DE CONTROLES */
         .controles-panel {
             background: var(--card);
-            padding: 25px;
+            padding: 20px;
             border-radius: 0 0 15px 15px;
             width: 100%;
-            max-width: 590px;
-            display: flex;
+            max-width: 600px;
+            display: none; /* Se activa solo para YouTube */
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             border: 1px solid #222;
+            box-sizing: border-box;
         }
 
-        .botones-row { display: flex; gap: 15px; align-items: center; }
+        .botones-row { display: flex; gap: 10px; align-items: center; }
 
         #btn-play {
             background: var(--primary);
             color: white;
             border: none;
-            width: 70px;
-            height: 70px;
+            width: 60px; height: 60px;
             border-radius: 50%;
             font-weight: bold;
-            font-size: 0.7rem;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
             transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        #btn-play:hover { transform: scale(1.1); background: #ff3333; }
 
         .btn-salto {
             background: #252525;
             border: 1px solid #333;
             color: white;
-            width: 45px;
-            height: 45px;
+            width: 45px; height: 45px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .btn-salto:hover { background: #444; }
-
-        .btn-reiniciar {
-            background: transparent;
-            color: #888;
-            border: 1px solid #444;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            text-transform: uppercase;
         }
 
         #aviso-drive {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #666;
-            display: none;
-            text-align: center;
+            margin-top: 15px; font-size: 0.85rem; color: #666; display: none;
         }
     </style>
 </head>
 <body>
 
-    <button class="btn-volver" onclick="window.history.back()">← Volver</button>
+    <a href="javascript:history.back()" class="btn-volver">← Volver a la lista</a>
 
     <div class="header-info">
         <h1 id="txt-titulo">Cargando...</h1>
@@ -182,182 +137,146 @@
     </div>
 
     <div id="video-container">
-         
         <div id="player"></div>
         
         <div id="aviso-play-pantalla" onclick="togglePlay()">
-            <p style="font-weight: bold; font-size: 1.1rem; margin: 0;">PRESIONA EL BOTÓN ROJO</p>
-            <p style="font-size: 0.9rem; opacity: 0.8;">para iniciar el video</p>
-            <div class="flecha-animada">↓</div>
+            <p style="font-weight: bold; margin: 0;">PRESIONA PLAY ABAJO</p>
+            <span style="font-size: 2rem; color: var(--primary);">↓</span>
         </div>
-        <div id="loading-screen" style="position:absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:30; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+
+        <div id="loading-screen">
             <div class="spinner"></div>
-            <p style="margin-top:15px; font-size:0.9rem;">Preparando video...</p>
+            <p style="margin-top:10px; font-size:0.8rem;">Obteniendo video...</p>
         </div>
+
         <div id="capa-bloqueo-total" class="capa-full"></div>
-        <div id="capa-bloqueo-drive" class="capa-esquina-drive"></div>   
+        <div id="capa-bloqueo-drive" class="capa-esquina-drive"></div> 
     </div>
 
     <div id="panel-controles" class="controles-panel">
         <div class="botones-row">
             <button class="btn-salto" onclick="seek(-10)">-10s</button>
-            <button class="btn-salto" onclick="seek(-5)">-5s</button>
-            
             <button id="btn-play" onclick="togglePlay()">PLAY</button>
-            
-            <button class="btn-salto" onclick="seek(5)">+5s</button>
             <button class="btn-salto" onclick="seek(10)">+10s</button>
         </div>
-        <button class="btn-reiniciar" onclick="reiniciar()">Reiniciar Marca</button>
+        <button style="background:none; border:none; color:#555; cursor:pointer; font-size:0.7rem;" onclick="reiniciar()">REINICIAR DESDE MARCA</button>
     </div>
 
-    <p id="aviso-drive">ℹ️ Usa los controles de la pantalla para este video.</p>
+    <p id="aviso-drive">ℹ️ Usa los controles integrados de Drive para este video.</p>
 
     <script type="module">
-        import { baseDeTemas } from './js/temas.js';
+        import { db } from "./firebase.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const params = new URLSearchParams(window.location.search);
         const idTema = params.get('id');
-        const tema = baseDeTemas[idTema];
-
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         window.player = null;
         let isYouTube = false;
         let playing = false;
-        let inicioPresionado = false; // Nueva variable para evitar el parpadeo
-        let timerCarga; // Variable para controlar el retraso del spinner
         let inicioPredeterminado = 0;
+        let temaData = null;
 
+        // 1. OBTENER DATOS DE FIREBASE
+        async function init() {
+            if (!idTema) return;
+
+            try {
+                const docRef = doc(db, "temas", idTema);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    temaData = docSnap.data();
+                    document.getElementById('txt-titulo').innerText = temaData.titulo;
+                    document.getElementById('txt-banda').innerText = temaData.artista;
+                    document.getElementById('txt-tono').innerText = temaData.tonalidad;
+                    inicioPredeterminado = temaData.inicio || 0;
+
+                    cargarAPI();
+                } else {
+                    document.getElementById('txt-titulo').innerText = "Video no encontrado";
+                    document.getElementById('loading-screen').style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Error:", e);
+            }
+        }
+
+        function cargarAPI() {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+        }
+
+        // 2. CONFIGURAR REPRODUCTOR SEGÚN FUENTE
         window.onYouTubeIframeAPIReady = function() {
-            if (!tema) return;
-
-            // Llenamos los datos del encabezado
-            document.getElementById('txt-titulo').innerText = tema.titulo;
-            document.getElementById('txt-banda').innerText = tema.artista;
-            document.getElementById('txt-tono').innerText = tema.tonalidad;
-            inicioPredeterminado = tema.inicio || 0;
-
             const panel = document.getElementById('panel-controles');
             const aviso = document.getElementById('aviso-drive');
-            const cTotal = document.getElementById('capa-bloqueo-total'); // Vidrio de YouTube
-            const cDrive = document.getElementById('capa-bloqueo-drive'); // Bloqueo de Drive
 
-            if (tema.fuente === "youtube") {
+            if (temaData.fuente === "youtube") {
                 isYouTube = true;
                 panel.style.display = 'flex';
-                aviso.style.display = 'none';
-                
-                // ACTIVAMOS EL VIDRIO TRANSPARENTE AQUÍ
-                cTotal.style.display = 'block'; 
-                cDrive.style.display = 'none';
+                document.getElementById('capa-bloqueo-total').style.display = 'block';
 
                 window.player = new YT.Player('player', {
                     height: '100%', width: '100%',
-                    videoId: tema.videoId,
+                    videoId: temaData.videoId,
                     playerVars: { 
                         'start': inicioPredeterminado, 
-                        'controls': 0, 'disablekb': 1, 'rel': 0, 'modestbranding': 1 
+                        'controls': 0, 'modestbranding': 1, 'rel': 0 
                     },
                     events: { 
-                        'onReady': onPlayerReady,
+                        'onReady': () => {
+                            document.getElementById('loading-screen').style.display = 'none';
+                            document.getElementById('aviso-play-pantalla').style.display = 'flex';
+                        },
                         'onStateChange': onPlayerStateChange 
                     }
                 });
             } else {
-                // Lógica para Google Drive
-                isYouTube = false;
-                panel.style.display = 'none';
+                // Lógica Google Drive
                 aviso.style.display = 'block';
-                cTotal.style.display = 'none'; // En Drive no necesitamos el vidrio total
-                cDrive.style.display = 'block'; // Solo bloqueamos la esquina
-
-                const iframeDrive = document.createElement('iframe');
-                iframeDrive.src = `https://drive.google.com/file/d/${tema.videoId}/preview`;
-                iframeDrive.allow = "autoplay";
-                iframeDrive.style = "width:100%; height:100%; position:absolute; top:0; left:0; border:none;";
-                
-                iframeDrive.onload = function() {
-                    document.getElementById('loading-screen').style.display = 'none';
-                };
-                document.getElementById('player').appendChild(iframeDrive);
+                document.getElementById('capa-bloqueo-drive').style.display = 'block';
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://drive.google.com/file/d/${temaData.videoId}/preview`;
+                iframe.onload = () => document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('player').appendChild(iframe);
             }
         };
-
-        function onPlayerReady(event) {
-            document.getElementById('loading-screen').style.display = 'none';
-            // Solo mostrar si el video está pausado o recién cargado
-            if (window.player.getPlayerState() !== YT.PlayerState.PLAYING) {
-                document.getElementById('aviso-play-pantalla').style.display = 'flex';
-            }
-        }
 
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play');
-            const avisoPlay = document.getElementById('aviso-play-pantalla');
-            
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.innerText = "PAUSA";
                 playing = true;
-                avisoPlay.style.display = 'none';
-                
-                // Si el video empieza a jugar, cancelamos cualquier spinner pendiente
-                clearTimeout(timerCarga);
-                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('aviso-play-pantalla').style.display = 'none';
             } else {
                 btn.innerText = "PLAY";
                 playing = false;
-                if (!inicioPresionado) {
-                    avisoPlay.style.display = 'flex';
-                }
-            }
-
-            // --- LÓGICA INTELIGENTE PARA EL SPINNER ---
-            if (event.data == YT.PlayerState.BUFFERING) {
-                // Esperamos medio segundo antes de mostrar el spinner
-                timerCarga = setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = 'flex';
-                }, 500); 
-            } else {
-                // Si sale de buffering antes de los 500ms, el spinner nunca se muestra
-                clearTimeout(timerCarga);
-                // Solo lo ocultamos si no estamos en el proceso de carga inicial
-                if (event.data !== YT.PlayerState.UNSTARTED) {
-                    document.getElementById('loading-screen').style.display = 'none';
-                }
             }
         }
 
+        // CONTROLES PÚBLICOS
         window.togglePlay = function() {
-            if (isYouTube && window.player) {
-                if (playing) {
-                    window.player.pauseVideo();
-                } else {
-                    // Marcamos que el usuario ya inició el video
-                    inicioPresionado = true; 
-                    document.getElementById('aviso-play-pantalla').style.display = 'none';
-                    window.player.playVideo();
-                }
-            }
+            if (!isYouTube || !window.player) return;
+            if (playing) window.player.pauseVideo();
+            else window.player.playVideo();
         };
 
-        window.seek = function(seg) {
+        window.seek = function(s) {
             if (isYouTube && window.player) {
-                window.player.seekTo(window.player.getCurrentTime() + seg, true);
+                window.player.seekTo(window.player.getCurrentTime() + s, true);
             }
         };
 
         window.reiniciar = function() {
             if (isYouTube && window.player) {
-                inicioPresionado = true; // Evita que salte el aviso al reiniciar
-                document.getElementById('aviso-play-pantalla').style.display = 'none';
                 window.player.seekTo(inicioPredeterminado, true);
                 window.player.playVideo();
             }
         };
+
+        init();
     </script>
 </body>
 </html>

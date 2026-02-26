@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Ripper Lab</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <style>
+        .form-admin { max-width: 500px; margin: 20px auto; padding: 20px; background: #1a1a1a; border-radius: 15px; }
+        .form-admin input, .form-admin select { width: 100%; padding: 10px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
+        .btn-save { width: 100%; padding: 15px; background: #e63946; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <nav><a href="home.html" style="color:white;">⬅ Volver</a></nav>
+    
+    <div class="form-admin">
+        <h2>Subir Nuevo Tema</h2>
+        <input type="text" id="titulo" placeholder="Título de la canción">
+        <input type="text" id="artista" placeholder="Nombre de la Banda/Artista">
+        <input type="text" id="tonalidad" placeholder="Ej: La menor">
+        <input type="text" id="videoId" placeholder="ID del Video (YouTube o Drive)">
+        <input type="number" id="inicio" placeholder="Segundo de inicio (ej: 30)">
+        
+        <select id="categoria">
+            <option value="huayno">Huayno</option>
+            <option value="salay">Salay</option>
+            <option value="cumbia">Cumbia</option>
+        </select>
+
+        <select id="fuente">
+            <option value="youtube">YouTube</option>
+            <option value="drive">Google Drive</option>
+        </select>
+
+        <button id="btnGuardar" class="btn-save">GUARDAR EN FIREBASE</button>
+        <p id="status"></p>
+    </div>
+
+    <script type="module">
+        import { db } from "./firebase.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        document.getElementById("btnGuardar").onclick = async () => {
+            const btn = document.getElementById("btnGuardar");
+            const status = document.getElementById("status");
+
+            const data = {
+                titulo: document.getElementById("titulo").value,
+                artista: document.getElementById("artista").value,
+                tonalidad: document.getElementById("tonalidad").value,
+                videoId: document.getElementById("videoId").value,
+                inicio: parseInt(document.getElementById("inicio").value) || 0,
+                categoria: document.getElementById("categoria").value,
+                fuente: document.getElementById("fuente").value
+            };
+
+            btn.innerText = "GUARDANDO...";
+            try {
+                await addDoc(collection(db, "temas"), data);
+                status.innerText = "¡Éxito! Tema guardado.";
+                status.style.color = "lightgreen";
+                // Limpiar formulario
+                document.querySelectorAll("input").forEach(i => i.value = "");
+            } catch (e) {
+                status.innerText = "Error: " + e.message;
+                status.style.color = "red";
+            }
+            btn.innerText = "GUARDAR EN FIREBASE";
+        };
+    </script>
+</body>
+</html>
