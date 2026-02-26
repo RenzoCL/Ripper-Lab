@@ -16,10 +16,13 @@ import { doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebas
 // ══════════════════════════════════════════════════════════════
 
 // ID único y persistente por navegador (no por pestaña)
+// js/seguridad.js
+
 export const getDeviceId = () => {
     let id = localStorage.getItem("rip_deviceId");
     if (!id) {
-        id = crypto.randomUUID();
+        // Usamos una combinación de tiempo y random por si crypto no está disponible
+        id = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now();
         localStorage.setItem("rip_deviceId", id);
     }
     return id;

@@ -85,44 +85,51 @@
     <footer class="site-footer">HECHO POR <span class="muted">RENZO CHAVARRIA</span></footer>
 
     <script type="module">
-        import { auth } from "./firebase.js";
+        import { auth, db } from "./firebase.js"; // Añade db aquí
         import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { reclamarSesion } from "./js/seguridad.js"; // Añade esta línea
 
         const btnLogin = document.getElementById("btnLogin");
         const errorMsg = document.getElementById("error-msg");
 
-        onAuthStateChanged(auth, user => { if (user) window.location.replace("home.html"); });
+        onAuthStateChanged(auth, async (user) => { 
+            if (user) {
+                // Antes de mandarlo a home, nos aseguramos de que este 
+                // navegador sea el "dueño" actual de la sesión.
+                try {
+                    await reclamarSesion(db, user.uid);
+                    window.location.replace("home.html");
+                } catch (e) {
+                    console.error("Error al reclamar sesión automática:", e);
+                    // Si hay error (ej. reglas de Firestore), igual lo mandamos
+                    window.location.replace("home.html");
+                }
+            }
+        });
 
         btnLogin.onclick = async () => {
             const email = document.getElementById("email").value;
             const pass  = document.getElementById("password").value;
             if (!email || !pass) return;
+            
             btnLogin.textContent = "VERIFICANDO...";
             errorMsg.style.display = "none";
+            
             try {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } catch {
+                // 1. Iniciar sesión
+                const cred = await signInWithEmailAndPassword(auth, email, pass);
+                
+                // 2. ACTUALIZAR DISPOSITIVO (Crucial para la expulsión)
+                await reclamarSesion(db, cred.user.uid);
+                
+                // 3. Redirigir
+                window.location.replace("home.html");
+            } catch (e) {
                 btnLogin.textContent = "ENTRAR";
                 errorMsg.style.display = "block";
                 errorMsg.textContent = "Acceso denegado. Verifica tus datos.";
             }
         };
-    </script>
-    <script>
-        (function() {
-            document.querySelectorAll('[data-carousel]').forEach(row => {
-                const wrap = row.closest('.carousel'); if (!wrap) return;
-                const prev = wrap.querySelector('.carousel-btn.prev');
-                const next = wrap.querySelector('.carousel-btn.next');
-                function go(d) {
-                    const c = row.querySelector('.card');
-                    const w = c ? c.getBoundingClientRect().width + 14 : 360;
-                    row.scrollBy({ left: w * d, behavior: 'smooth' });
-                }
-                if (prev) prev.addEventListener('click', () => go(-1));
-                if (next) next.addEventListener('click', () => go(1));
-            });
-        })();
     </script>
 </body>
 </html>
