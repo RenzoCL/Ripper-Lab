@@ -1,8 +1,21 @@
 // js/seguridad.js
 import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// ── Genera o recupera un ID único por navegador ──
+// ══════════════════════════════════════════════════════════════
+//  ARQUITECTURA CORRECTA:
+//
+//  ✅ reclamarSesion(auth, db)  → se llama UNA SOLA VEZ al hacer LOGIN
+//     Escribe { deviceId } en Firestore. Esto expulsa al otro dispositivo.
+//
+//  ✅ vigilarSesion(auth, db, contenedorId) → se llama en cada página protegida
+//     SOLO escucha cambios. NUNCA escribe. Si el deviceId cambia → expulsión.
+//
+//  ❌ El error anterior: vigilarSesion escribía en cada página, así que
+//     celular y PC se sobreescribían mutuamente sin expulsarse nunca.
+// ══════════════════════════════════════════════════════════════
+
+// ID único y persistente por navegador (no por pestaña)
 export const getDeviceId = () => {
     let id = localStorage.getItem("rip_deviceId");
     if (!id) {
@@ -12,19 +25,33 @@ export const getDeviceId = () => {
     return id;
 };
 
+// ── Llamar SOLO desde login.html al hacer sign in exitoso ──
+export async function reclamarSesion(db, userId) {
+    const deviceId = getDeviceId();
+    await setDoc(doc(db, "sessions", userId), {
+        deviceId,
+        claimedAt: Date.now()
+    }); // sin merge → sobreescritura total → expulsa al dispositivo anterior
+}
+
 // ── Pantalla de expulsión ──
 export function manejarExpulsion(contenedor, auth) {
     if (!contenedor) return;
+
+    // Reemplaza todo el contenido de la página con la pantalla de expulsión
     contenedor.innerHTML = `
-        <div class="expulsion-card">
-            <h3 style="color:#e50914; font-size:1.5rem; margin-bottom:12px;">🚫 Sesión desplazada</h3>
-            <p style="color:#ccc;">Tu cuenta fue abierta en otro dispositivo.</p>
-            <div class="aviso-importante" style="margin:18px 0;">
-                ⚠️ <strong>Recuerda:</strong> Solo se permite <b>un dispositivo activo</b> por cuenta.
+        <div style="min-height:80vh; display:flex; align-items:center; justify-content:center; padding:20px;">
+            <div class="expulsion-card">
+                <div style="font-size:3rem; margin-bottom:12px;">🚫</div>
+                <h3 style="color:#e50914; font-size:1.4rem; margin-bottom:10px;">Sesión desplazada</h3>
+                <p style="color:#ccc; margin-bottom:16px;">Tu cuenta fue abierta en otro dispositivo o navegador.</p>
+                <div class="aviso-importante">
+                    ⚠️ <strong>Recuerda:</strong> Solo se permite <b>un dispositivo activo</b> por cuenta a la vez.
+                </div>
+                <p style="color:#fff; margin-top:20px; font-size:0.95rem;">
+                    Cerrando sesión en <span id="seg-cuenta" style="color:#e50914; font-weight:700; font-size:1.2rem;">10</span>s...
+                </p>
             </div>
-            <p style="color:#fff; font-size:1rem;">
-                Cerrando sesión en <span id="seg-cuenta" style="color:#e50914; font-weight:700;">10</span>s...
-            </p>
         </div>`;
 
     let seg = 10;
@@ -40,50 +67,45 @@ export function manejarExpulsion(contenedor, auth) {
     }, 1000);
 }
 
-// ── Vigilancia activa: 1 dispositivo por cuenta ──
+// ── Vigilar sesión en páginas protegidas (SOLO ESCUCHA, nunca escribe) ──
 export function vigilarSesion(auth, db, contenedorId) {
     const deviceId = getDeviceId();
-    let snapshotUnsub = null;
+    let unsub = null;
+    let expulsado = false;
 
-    auth.onAuthStateChanged(async (user) => {
+    auth.onAuthStateChanged((user) => {
         if (!user) {
-            // Sin sesión → login
-            if (!window.location.pathname.includes("index.html")) {
+            if (!window.location.pathname.includes("index.html"))
                 window.location.href = "index.html";
-            }
             return;
         }
 
         const sessionRef = doc(db, "sessions", user.uid);
 
-        // 1. Registrar este dispositivo como el activo
-        try {
-            await setDoc(sessionRef, {
-                deviceId,
-                lastActive: serverTimestamp()
-            }, { merge: true });
-        } catch (e) {
-            console.warn("No se pudo registrar la sesión:", e);
-        }
+        // Limpiar listener anterior si existe
+        if (unsub) { unsub(); unsub = null; }
 
-        // 2. Escuchar cambios en tiempo real
-        if (snapshotUnsub) snapshotUnsub(); // Limpiar listener previo
-        snapshotUnsub = onSnapshot(sessionRef, (snap) => {
-            if (!snap.exists()) return;
+        // SOLO ESCUCHAR — nunca escribir aquí
+        unsub = onSnapshot(sessionRef, (snap) => {
+            if (expulsado) return;
+            if (!snap.exists()) return; // Sin documento aún, esperar
+
             const data = snap.data();
-            // Si el deviceId en Firestore ya no es el nuestro → expulsión
+
+            // Si el deviceId guardado ya no es el nuestro → alguien más hizo login → expulsión
             if (data.deviceId && data.deviceId !== deviceId) {
-                if (snapshotUnsub) { snapshotUnsub(); snapshotUnsub = null; }
+                expulsado = true;
+                if (unsub) { unsub(); unsub = null; }
                 const wrapper = document.getElementById(contenedorId);
                 manejarExpulsion(wrapper, auth);
             }
         }, (err) => {
-            console.warn("Error al escuchar sesión:", err);
+            console.warn("Error listener sesión:", err);
         });
     });
 }
 
-// ── Cerrar sesión global ──
+// ── Cerrar sesión ──
 export async function globalLogout(auth) {
     await signOut(auth);
     window.location.href = "index.html";

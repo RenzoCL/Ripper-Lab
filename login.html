@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entrar — Ripper</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --red: #e50914; --red-glow: rgba(229,9,20,0.4);
-            --bg:  #080808; --surface: rgba(12,12,12,0.82);
+            --bg:  #080808; --surface: rgba(12,12,12,0.88);
             --border: rgba(255,255,255,0.07);
             --muted: #bdbdbd;
             --font-display: 'Bebas Neue', sans-serif;
             --font-body:    'Outfit', sans-serif;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100vh; font-family: var(--font-body); background: var(--bg); color: #fff; overflow: hidden; }
+        html, body { height: 100%; font-family: var(--font-body); background: var(--bg); color: #fff; }
 
-        /* Grain */
         body::after {
             content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.3;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
@@ -27,7 +27,7 @@
         .page {
             min-height: 100vh; display: flex; flex-direction: column;
             align-items: center; justify-content: center; padding: 32px 20px;
-            background-image: radial-gradient(ellipse at 20% 20%, rgba(229,9,20,0.04), transparent 50%);
+            background-image: radial-gradient(ellipse at 20% 20%, rgba(229,9,20,0.05), transparent 50%);
         }
 
         .box {
@@ -60,10 +60,7 @@
             color: #fff; font-family: var(--font-body); font-size: 0.9rem; outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .login-input:focus {
-            border-color: rgba(229,9,20,0.6);
-            box-shadow: 0 0 0 3px rgba(229,9,20,0.1);
-        }
+        .login-input:focus { border-color: rgba(229,9,20,0.6); box-shadow: 0 0 0 3px rgba(229,9,20,0.1); }
 
         .btn-login {
             width: 100%; margin-top: 14px; padding: 12px;
@@ -74,6 +71,7 @@
         }
         .btn-login:hover  { filter: brightness(1.1); }
         .btn-login:active { transform: scale(0.98); }
+        .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
 
         .wa-section { margin-top: 18px; text-align: center; }
         .wa-text     { color: #888; font-size: 0.82rem; margin-bottom: 10px; }
@@ -86,9 +84,8 @@
         footer { margin-top: 20px; color: #555; font-size: 0.8rem; letter-spacing: 0.08em; }
 
         @media (max-width: 420px) {
-            body { overflow: auto; }
             .box { padding: 22px 18px; }
-            .brand { font-size: 2rem; }
+            .brand { font-size: 2.2rem; }
         }
     </style>
 </head>
@@ -118,36 +115,52 @@
                 </a>
             </div>
         </div>
-
         <footer>HECHO POR RENZO CHAVARRIA</footer>
     </div>
 
     <script type="module">
-        import { auth } from "./firebase.js";
+        import { auth, db } from "./firebase.js";
         import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { reclamarSesion } from "./js/seguridad.js";
 
         const btn = document.getElementById("btnLogin");
         const err = document.getElementById("error-msg");
 
-        onAuthStateChanged(auth, user => { if (user) window.location.replace("home.html"); });
+        // Si ya tiene sesión activa, ir a home
+        onAuthStateChanged(auth, user => {
+            if (user) window.location.replace("home.html");
+        });
 
-        btn.onclick = async () => {
-            const email = document.getElementById("email").value;
+        async function doLogin() {
+            const email = document.getElementById("email").value.trim();
             const pass  = document.getElementById("password").value;
             if (!email || !pass) return;
+
             btn.textContent = "VERIFICANDO...";
+            btn.disabled = true;
             err.style.display = "none";
+
             try {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } catch {
+                // 1. Autenticar
+                const cred = await signInWithEmailAndPassword(auth, email, pass);
+
+                // 2. RECLAMAR SESIÓN — esto expulsa a cualquier otro dispositivo
+                //    que esté usando esta cuenta en ese momento
+                await reclamarSesion(db, cred.user.uid);
+
+                // 3. Ir a home
+                window.location.replace("home.html");
+
+            } catch (e) {
                 btn.textContent = "ENTRAR";
+                btn.disabled = false;
                 err.textContent = "Acceso denegado. Verifica tus datos.";
                 err.style.display = "block";
             }
-        };
+        }
 
-        // Enter key
-        document.addEventListener("keydown", e => { if (e.key === "Enter") btn.click(); });
+        btn.onclick = doLogin;
+        document.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
     </script>
 </body>
 </html>

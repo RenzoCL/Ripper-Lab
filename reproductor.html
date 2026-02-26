@@ -4,41 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reproductor — Ripper</title>
+    <!-- Cargar fuentes ANTES del CSS para garantizar que estén disponibles en móvil -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/estilo.css">
     <style>
+        /* Variables locales — no dependen del CSS global para garantizar render en móvil */
+        :root {
+            --r: #e50914;
+            --r-glow: rgba(229,9,20,0.4);
+        }
+
         .page-body {
-            padding: calc(var(--header-height) + 20px) 20px 50px;
+            padding: calc(var(--header-h, 64px) + 20px) 20px 50px;
             max-width: 860px; margin: 0 auto;
             animation: fadeUp 0.4s ease both;
         }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-        /* ── TITLE ── */
+        /* ── BADGE "EN REPRODUCCIÓN" ── 
+           Colores hardcodeados para que funcionen en móvil
+           sin depender de variables CSS */
         .label-tag {
             display: inline-flex; align-items: center; gap: 6px;
-            background: var(--red); color: white;
-            font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
-            padding: 4px 10px; border-radius: 3px; margin-bottom: 10px;
+            background: #e50914;            /* rojo fijo */
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            padding: 5px 11px; border-radius: 4px; margin-bottom: 12px;
         }
         .label-tag::before {
-            content: ''; width: 5px; height: 5px; background: white;
-            border-radius: 50%; display: inline-block; animation: blink 1.5s infinite;
+            content: ''; width: 6px; height: 6px;
+            background: white; border-radius: 50%;
+            display: inline-block; flex-shrink: 0;
+            animation: blink 1.5s infinite;
         }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
 
+        /* ── TÍTULO ──
+           font-family con fallback explícito */
         .title-main {
-            font-family: var(--font-display);
-            font-size: clamp(1.9rem, 5vw, 3rem);
+            font-family: 'Bebas Neue', 'Arial Black', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 3rem);
             letter-spacing: 0.04em; line-height: 1;
-            background: linear-gradient(135deg, #fff 60%, #777);
+            background: linear-gradient(135deg, #ffffff 60%, #888888);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; margin-bottom: 10px;
+            background-clip: text;
+            margin-bottom: 10px;
         }
-        .meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
-        .meta-item { font-size: 0.82rem; color: var(--muted); }
+
+        .meta-row  { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+        .meta-item { font-size: 0.82rem; color: #a0a0a0; font-family: 'Outfit', sans-serif; }
         .meta-dot  { width: 3px; height: 3px; background: #444; border-radius: 50%; }
         .tono-badge {
-            background: var(--red-dim); border: 1px solid rgba(229,9,20,0.38);
+            background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.4);
             color: #ff6060; font-size: 0.7rem; font-weight: 600;
             padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em;
         }
@@ -46,7 +66,10 @@
         /* ── PLAYER WRAPPER ── */
         .player-wrapper {
             border-radius: 12px; overflow: hidden;
-            box-shadow: 0 0 0 1px var(--border), 0 24px 60px rgba(0,0,0,0.7), 0 0 50px rgba(229,9,20,0.06);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.07),
+                0 24px 60px rgba(0,0,0,0.7),
+                0 0 50px rgba(229,9,20,0.06);
         }
 
         #video-container {
@@ -54,7 +77,7 @@
             background: #000; position: relative;
         }
 
-        /* LOADING */
+        /* Loading */
         #loading-screen {
             position: absolute; inset: 0;
             background: radial-gradient(ellipse at center, #150808 0%, #000 70%);
@@ -63,133 +86,129 @@
         }
         .loader-ring {
             width: 44px; height: 44px;
-            border: 3px solid rgba(229,9,20,0.1); border-top-color: var(--red);
+            border: 3px solid rgba(229,9,20,0.1); border-top-color: #e50914;
             border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to{transform:rotate(360deg)} }
-        .loader-text { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: #444; }
+        .loader-text { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: #444; font-family: 'Outfit', sans-serif; }
 
-        /* ══════════════════════════════════════════════
-           OVERLAY YOUTUBE
-           - Cubre todo el video → absorbe clics
-           - Texto grande y legible
-           - Se oculta al reproducir, reaparece al pausar
-        ══════════════════════════════════════════════ */
+        /* ══════════════════════════════════════
+           OVERLAY YOUTUBE — fuerza usar el botón
+           Texto grande, fondo sólido oscuro
+        ══════════════════════════════════════ */
         #yt-overlay {
             position: absolute; inset: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.88);
             z-index: 20; display: none;
             flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-            pointer-events: all;  /* ← absorbe TODOS los clics */
-            cursor: default;
+            pointer-events: all; cursor: default;
         }
-        .overlay-icon { font-size: 3.5rem; line-height: 1; }
-        .overlay-title {
-            font-family: var(--font-display);
-            font-size: 1.6rem; letter-spacing: 0.08em;
+        .ov-icon  { font-size: 3.2rem; line-height: 1; }
+        .ov-title {
+            font-family: 'Bebas Neue', 'Arial Black', sans-serif;
+            font-size: 1.8rem; letter-spacing: 0.1em;
             color: #ffffff; text-align: center;
         }
-        .overlay-sub {
-            font-size: 0.9rem; color: rgba(255,255,255,0.7);
-            text-align: center; max-width: 280px; line-height: 1.5;
-        }
-        .overlay-arrow {
-            font-size: 2.2rem; color: var(--red);
+        .ov-sub   { font-size: 0.88rem; color: rgba(255,255,255,0.65); text-align: center; font-family: 'Outfit', sans-serif; }
+        .ov-arrow {
+            font-size: 2rem; color: #e50914;
             animation: bounce 0.85s ease-in-out infinite;
-            margin-top: 4px;
         }
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(10px)} }
 
-        /* Bloqueo total del iframe YT */
+        /* Capa bloqueo total YT */
         .capa-full {
             position: absolute; inset: 0; z-index: 10; display: none;
             background: transparent; pointer-events: all; cursor: default;
         }
-        /* Bloqueo solo esquina superior derecha de Drive (botón "abrir externamente") */
-        .capa-esquina-drive {
+        /* Bloqueo solo esquina Drive */
+        .capa-corner-drive {
             position: absolute; top: 0; right: 0;
-            width: 110px; height: 75px;
-            z-index: 15; display: none;
+            width: 110px; height: 75px; z-index: 15; display: none;
             background: transparent; pointer-events: all; cursor: not-allowed;
         }
 
-        #player, #player iframe { width: 100% !important; height: 100% !important; border: none; }
+        #player, #player iframe { width:100% !important; height:100% !important; border:none; }
 
-        /* ── CONTROLS (solo YouTube) ── */
+        /* ── PANEL CONTROLES (solo YouTube) ── */
         .controls-panel {
-            background: var(--surface); border: 1px solid var(--border); border-top: none;
-            border-radius: 0 0 12px 12px; padding: 16px 20px;
+            background: #141414; border: 1px solid rgba(255,255,255,0.07); border-top: none;
+            border-radius: 0 0 12px 12px; padding: 16px 18px;
             display: none; flex-direction: column; align-items: center; gap: 14px;
         }
 
-        .progress-track { width: 100%; height: 3px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
-        .progress-fill  { height: 100%; width: 0%; background: linear-gradient(90deg, var(--red), #ff4d4d); border-radius: 10px; transition: width 0.5s linear; }
+        .progress-track { width:100%; height:3px; background:rgba(255,255,255,0.07); border-radius:10px; overflow:hidden; }
+        .progress-fill  { height:100%; width:0%; background:linear-gradient(90deg,#e50914,#ff4d4d); border-radius:10px; transition:width 0.5s linear; }
 
-        .controls-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: center; }
+        .controls-row   { display:flex; align-items:center; gap:7px; flex-wrap:wrap; justify-content:center; }
 
         .btn-seek {
-            background: var(--surface2); border: 1px solid var(--border);
-            color: var(--muted); width: 40px; height: 40px; border-radius: 8px;
-            cursor: pointer; font-size: 0.68rem; font-family: var(--font-body); font-weight: 600;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.15s, color 0.15s;
+            background: #1c1c1c; border: 1px solid rgba(255,255,255,0.07);
+            color: #a0a0a0; width:40px; height:40px; border-radius:8px;
+            cursor:pointer; font-size:0.68rem; font-family:'Outfit',sans-serif; font-weight:600;
+            display:flex; align-items:center; justify-content:center;
+            transition:background 0.15s, color 0.15s;
         }
-        .btn-seek:hover { background: rgba(255,255,255,0.09); color: white; }
+        .btn-seek:hover { background:rgba(255,255,255,0.09); color:white; }
 
+        /* ── BOTÓN PLAY — colores hardcodeados, no variables ── */
         #btn-play {
-            background: var(--red); border: none; color: white;
+            background: #e50914;            /* rojo fijo — funciona en iOS/Android */
+            border: none; color: white;
             width: 62px; height: 62px; border-radius: 50%; cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
-            box-shadow: 0 4px 20px var(--red-glow);
+            box-shadow: 0 4px 20px rgba(229,9,20,0.4);
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; position: relative;
+            -webkit-appearance: none; /* reset iOS */
         }
         #btn-play:not(.playing)::after {
-            content: ''; position: absolute; inset: -5px; border-radius: 50%;
-            border: 2px solid rgba(229,9,20,0.4);
-            animation: pulse 1.8s ease-out infinite;
+            content:''; position:absolute; inset:-5px; border-radius:50%;
+            border:2px solid rgba(229,9,20,0.4);
+            animation:pulse 1.8s ease-out infinite;
         }
         @keyframes pulse { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(1.6);opacity:0} }
-        #btn-play:hover  { transform: scale(1.07); box-shadow: 0 8px 30px var(--red-glow); }
-        #btn-play:active { transform: scale(0.96); }
-        #btn-play svg { width: 21px; height: 21px; fill: white; }
-        #btn-play.playing .icon-play  { display: none; }
-        #btn-play.playing .icon-pause { display: block !important; }
+        #btn-play:hover  { transform:scale(1.07); box-shadow:0 8px 30px rgba(229,9,20,0.5); }
+        #btn-play:active { transform:scale(0.96); }
+        #btn-play svg { width:21px; height:21px; fill:white; }
+        #btn-play.playing .icon-play  { display:none; }
+        #btn-play.playing .icon-pause { display:block !important; }
 
-        .sep { width: 1px; height: 24px; background: var(--border); margin: 0 3px; }
+        .sep { width:1px; height:24px; background:rgba(255,255,255,0.07); margin:0 3px; }
 
         .btn-restart {
-            background: transparent; border: 1px solid var(--border); color: var(--muted);
-            padding: 0 12px; height: 34px; border-radius: 6px; cursor: pointer;
-            font-family: var(--font-body); font-size: 0.68rem; font-weight: 500;
-            letter-spacing: 0.08em; text-transform: uppercase;
-            display: flex; align-items: center; gap: 5px; transition: all 0.15s;
+            background:transparent; border:1px solid rgba(255,255,255,0.07); color:#a0a0a0;
+            padding:0 12px; height:34px; border-radius:6px; cursor:pointer;
+            font-family:'Outfit',sans-serif; font-size:0.68rem; font-weight:500;
+            letter-spacing:0.08em; text-transform:uppercase;
+            display:flex; align-items:center; gap:5px; transition:all 0.15s;
         }
-        .btn-restart:hover { color: white; border-color: var(--border2); }
-        .btn-restart svg { width: 12px; height: 12px; }
+        .btn-restart:hover { color:white; border-color:rgba(255,255,255,0.15); }
+        .btn-restart svg   { width:12px; height:12px; }
 
         .drive-notice {
-            display: none; margin-top: 12px; padding: 10px 14px;
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 8px; font-size: 0.78rem; color: var(--muted); text-align: center;
+            display:none; margin-top:12px; padding:10px 14px;
+            background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+            border-radius:8px; font-size:0.78rem; color:#a0a0a0; text-align:center;
+            font-family:'Outfit',sans-serif;
         }
 
         @media (max-width: 480px) {
-            .page-body { padding-left: 12px; padding-right: 12px; }
-            .btn-seek  { width: 34px; height: 34px; font-size: 0.62rem; }
-            #btn-play  { width: 52px; height: 52px; }
-            .overlay-title { font-size: 1.3rem; }
+            .page-body { padding-left:12px; padding-right:12px; }
+            .btn-seek   { width:34px; height:34px; font-size:0.62rem; }
+            #btn-play   { width:54px; height:54px; }
+            .ov-title   { font-size:1.4rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ══ HEADER ══ -->
+    <!-- HEADER -->
     <header class="site-header">
         <div class="header-inner">
             <div class="col-left">
                 <a href="lista-temas.html" class="btn-nav" id="btn-volver">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12">
                         <path d="M19 12H5M12 19l-7-7 7-7"/>
                     </svg>
                     <span>Volver</span>
@@ -200,7 +219,7 @@
             </div>
             <div class="col-right">
                 <button id="btnLogOut" class="btn-nav btn-logout">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
                         <line x1="21" y1="12" x2="9" y2="12"/>
@@ -211,10 +230,10 @@
         </div>
     </header>
 
-    <!-- ══ CONTENT ══ -->
     <div class="page-body">
 
-        <div class="title-area" style="margin-bottom:18px;">
+        <div style="margin-bottom:18px;">
+            <!-- Badge rojo con punto parpadeante -->
             <div class="label-tag">En reproducción</div>
             <h1 class="title-main" id="txt-titulo">Cargando...</h1>
             <div class="meta-row">
@@ -228,42 +247,32 @@
             <div id="video-container">
                 <div id="player"></div>
 
-                <!--
-                    OVERLAY YOUTUBE:
-                    • pointer-events:all → BLOQUEA todos los clics al video
-                    • Solo se oculta cuando el video está REALMENTE reproduciendo
-                    • Texto grande y visible para guiar al usuario
-                -->
+                <!-- Overlay YouTube: bloquea clics, guía al botón de abajo -->
                 <div id="yt-overlay">
-                    <span class="overlay-icon">🎵</span>
-                    <span class="overlay-title">PRESIONA PLAY</span>
-                    <span class="overlay-sub">Usa el botón rojo de abajo para reproducir</span>
-                    <span class="overlay-arrow">▼</span>
+                    <span class="ov-icon">🎵</span>
+                    <span class="ov-title">PRESIONA PLAY</span>
+                    <span class="ov-sub">Usa el botón rojo de abajo para reproducir</span>
+                    <span class="ov-arrow">▼</span>
                 </div>
 
-                <!-- Loading -->
                 <div id="loading-screen">
                     <div class="loader-ring"></div>
                     <p class="loader-text">Obteniendo video</p>
                 </div>
 
-                <!-- Bloqueo total del iframe YouTube -->
                 <div id="capa-yt" class="capa-full"></div>
-
-                <!-- Solo bloquea esquina sup. derecha de Drive (botón "abrir externamente") -->
-                <div id="capa-drive-corner" class="capa-esquina-drive"></div>
+                <div id="capa-drive" class="capa-corner-drive"></div>
             </div>
 
-            <!-- Panel controles YouTube -->
+            <!-- Controles — solo para YouTube -->
             <div id="panel-controles" class="controls-panel">
                 <div class="progress-track">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
                 <div class="controls-row">
-
-                    <button class="btn-seek" onclick="seek(-1)">−1s</button>
-                    <button class="btn-seek" onclick="seek(-5)">−5s</button>
                     <button class="btn-seek" onclick="seek(-10)">−10s</button>
+                    <button class="btn-seek" onclick="seek(-5)">−5s</button>
+                    <button class="btn-seek" onclick="seek(-1)">−1s</button>
 
                     <button id="btn-play" onclick="togglePlay()">
                         <svg class="icon-play"  viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -271,11 +280,11 @@
                             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                         </svg>
                     </button>
-                    
-                    <button class="btn-seek" onclick="seek(10)">+10s</button>
-                    <button class="btn-seek" onclick="seek(5)">+5s</button>
+
                     <button class="btn-seek" onclick="seek(1)">+1s</button>
-                                        
+                    <button class="btn-seek" onclick="seek(5)">+5s</button>
+                    <button class="btn-seek" onclick="seek(10)">+10s</button>
+
                     <div class="sep"></div>
 
                     <button class="btn-restart" onclick="reiniciar()">
@@ -308,11 +317,11 @@
         document.getElementById('btn-volver').href = `lista-temas.html?cat=${catParam}`;
 
         window.player = null;
-        let isYouTube    = false;
-        let playing      = false;
-        let inicio       = 0;
-        let temaData     = null;
-        let ignorarPausa = false; // ← evita que cambiar de pestaña muestre el overlay
+        let isYouTube = false;
+        let playing   = false;
+        let inicio    = 0;
+        let temaData  = null;
+        let ignorarPausa = false;
 
         async function init() {
             if (!idTema) return;
@@ -332,12 +341,11 @@
                 const s = document.createElement('script');
                 s.src = "https://www.youtube.com/iframe_api";
                 document.head.appendChild(s);
-            } catch (e) { console.error(e); }
+            } catch(e) { console.error(e); }
         }
 
         window.onYouTubeIframeAPIReady = function() {
             if (temaData.fuente === "youtube") {
-                // ── YOUTUBE ──
                 isYouTube = true;
                 document.getElementById('panel-controles').style.display = 'flex';
                 document.getElementById('capa-yt').style.display = 'block';
@@ -346,13 +354,8 @@
                     height: '100%', width: '100%',
                     videoId: temaData.videoId,
                     playerVars: {
-                        start: inicio,
-                        controls: 0,       // ocultamos controles nativos YT
-                        modestbranding: 1,
-                        rel: 0,
-                        disablekb: 1,
-                        // ── CLAVE: permite reproducción en background ──
-                        playsinline: 1
+                        start: inicio, controls: 0,
+                        modestbranding: 1, rel: 0, disablekb: 1, playsinline: 1
                     },
                     events: {
                         onReady: () => {
@@ -363,24 +366,18 @@
                     }
                 });
 
-                // ── CLAVE: cuando el usuario vuelve a la pestaña, NO mostrar overlay ──
-                // El video puede haberse pausado por el navegador al cambiar de pestaña;
-                // lo reanudamos automáticamente.
+                // Reanudar si el navegador pausó al cambiar de pestaña
                 document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'visible' && isYouTube && window.player) {
-                        // Si estaba reproduciendo antes de salir, reanudar
-                        if (playing) {
-                            ignorarPausa = true;
-                            setTimeout(() => { ignorarPausa = false; }, 2000);
-                            window.player.playVideo();
-                        }
+                    if (document.visibilityState === 'visible' && isYouTube && window.player && playing) {
+                        ignorarPausa = true;
+                        setTimeout(() => { ignorarPausa = false; }, 2000);
+                        window.player.playVideo();
                     }
                 });
 
             } else {
-                // ── GOOGLE DRIVE: controles nativos libres ──
-                // Solo bloqueamos la esquina de "abrir externamente"
-                document.getElementById('capa-drive-corner').style.display = 'block';
+                // Google Drive: controles nativos libres, solo bloquear botón ext.
+                document.getElementById('capa-drive').style.display = 'block';
                 document.getElementById('aviso-drive').style.display = 'block';
 
                 const iframe = document.createElement('iframe');
@@ -394,30 +391,19 @@
 
         function ytStateChange(e) {
             const btn = document.getElementById('btn-play');
-
             if (e.data === YT.PlayerState.PLAYING) {
-                btn.classList.add('playing');
-                playing = true;
-                ignorarPausa = false;
+                btn.classList.add('playing'); playing = true; ignorarPausa = false;
                 document.getElementById('yt-overlay').style.display = 'none';
-
             } else if (e.data === YT.PlayerState.PAUSED) {
-                btn.classList.remove('playing');
-                playing = false;
-
-                // Solo mostrar overlay si NO fue una pausa por cambio de pestaña
-                if (!ignorarPausa) {
+                btn.classList.remove('playing'); playing = false;
+                if (!ignorarPausa)
                     document.getElementById('yt-overlay').style.display = 'flex';
-                }
-
             } else if (e.data === YT.PlayerState.ENDED) {
-                btn.classList.remove('playing');
-                playing = false;
+                btn.classList.remove('playing'); playing = false;
                 document.getElementById('yt-overlay').style.display = 'flex';
             }
         }
 
-        // Barra de progreso
         setInterval(() => {
             if (window.player && isYouTube && playing) {
                 const d = window.player.getDuration();
