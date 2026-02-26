@@ -141,7 +141,7 @@
         
         <div id="aviso-play-pantalla" onclick="togglePlay()">
             <p style="font-weight: bold; margin: 0;">PRESIONA PLAY ABAJO</p>
-            <span style="font-size: 2rem; color: var(--primary);">↓</span>
+            <span style="font-size: 2rem; color: var(--primary);">⬇️⬇️⬇️⬇️⬇️</span>
         </div>
 
         <div id="loading-screen">
@@ -155,9 +155,11 @@
 
     <div id="panel-controles" class="controles-panel">
         <div class="botones-row">
+            <button class="btn-salto" onclick="seek(-1)">-1s</button>
             <button class="btn-salto" onclick="seek(-5)">-5s</button>
             <button class="btn-salto" onclick="seek(-10)">-10s</button>
             <button id="btn-play" onclick="togglePlay()">PLAY</button>
+            <button class="btn-salto" onclick="seek(1)">+1s</button>
             <button class="btn-salto" onclick="seek(5)">+5s</button>
             <button class="btn-salto" onclick="seek(10)">+10s</button>
         </div>
