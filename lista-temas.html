@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temas</title>
+    <title>Explorar Temas - Ripper Lab</title>
     <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
     <div id="lista-wrapper">
-        <nav>
-            <a href="home.html" class="btn-nav">⬅ Volver</a>
-            <h2 id="titulo-cat" style="margin:0; text-transform: uppercase; font-size: 1.1rem;">Cargando...</h2>
-        </nav>
+        <header class="site-header">
+            <div class="header-inner">
+                <a href="home.html" class="btn-nav" style="margin:0;">⬅ Volver</a>
+                <a href="home.html" class="logo" style="text-decoration:none; flex:1; text-align:center;">RIPPER</a>
+                <button id="btnLogOut" class="btn-nav btn-logout" style="margin:0;">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <input type="text" id="buscador" class="buscador" placeholder="🔎 Buscar por título o artista...">
 
         <div class="container">
-            <input type="text" id="buscador" class="buscador" placeholder="🔎 Buscar en la nube por título o artista...">
             <div id="lista" class="grid-huaynos">
                 </div>
         </div>
@@ -22,7 +26,7 @@
 
     <script type="module">
         import { auth, db } from "./firebase.js";
-        import { vigilarSesion } from "./js/seguridad.js";
+        import { vigilarSesion, globalLogout } from "./js/seguridad.js";
         // Añadimos 'query' y 'where' para filtrar en la nube
         import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -30,7 +34,9 @@
 
         const params = new URLSearchParams(window.location.search);
         const catActual = params.get('cat') || 'huayno';
-        document.getElementById("titulo-cat").innerText = catActual;
+        
+        // Botón de cerrar sesión
+        document.getElementById("btnLogOut").onclick = () => globalLogout(auth);
 
         const listaDiv = document.getElementById("lista");
         const buscador = document.getElementById("buscador");

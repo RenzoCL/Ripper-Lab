@@ -23,11 +23,10 @@
     <section class="hero">
         <div class="hero-content">
                 <div class="hero-left">
-                <h1>Partituras y audios al instante</h1>
-                <p>Encuentra y reproduce partituras y audios de tus canciones favoritas, en cualquier dispositivo.</p>
+                <h1>Huaynos (Estilo Huaraz)</h1>
+                <p>Escucha los huaynos mientras miras la partitura.</p>
                 <div class="hero-ctas">
-                    <a class="btn btn-primary" href="login.html">Ver ahora</a>
-                    <a class="btn btn-outline" href="login.html">Explorar</a>
+                    <a class="btn btn-primary" href="login.html">Comenzar</a>
                 </div>
             </div>
 
@@ -52,32 +51,50 @@
     <main class="site-main">
         <section class="row">
             <h3 class="row-title">Recomendados</h3>
-            <div class="row-cards">
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
+            <div class="carousel">
+                <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                <div class="row-cards" data-carousel>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                </div>
+                <button class="carousel-btn next" aria-label="Siguiente">▶</button>
+                <div class="scroll-fade left"></div>
+                <div class="scroll-fade right"></div>
             </div>
         </section>
 
         <section class="row">
             <h3 class="row-title">Nuevos</h3>
-            <div class="row-cards">
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
+            <div class="carousel">
+                <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                <div class="row-cards" data-carousel>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                </div>
+                <button class="carousel-btn next" aria-label="Siguiente">▶</button>
+                <div class="scroll-fade left"></div>
+                <div class="scroll-fade right"></div>
             </div>
         </section>
 
         <section class="row">
             <h3 class="row-title">Populares</h3>
-            <div class="row-cards">
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
-                <div class="card"><div class="poster"></div></div>
+            <div class="carousel">
+                <button class="carousel-btn prev" aria-label="Anterior">◀</button>
+                <div class="row-cards" data-carousel>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                    <div class="card"><div class="poster"></div></div>
+                </div>
+                <button class="carousel-btn next" aria-label="Siguiente">▶</button>
+                <div class="scroll-fade left"></div>
+                <div class="scroll-fade right"></div>
             </div>
         </section>
     </main>
@@ -111,6 +128,29 @@
                 errorMsg.innerText = "Acceso denegado. Verifica tus datos.";
             }
         };
+    </script>
+    <script>
+        (function(){
+            const carousels = document.querySelectorAll('[data-carousel]');
+            carousels.forEach((row)=>{
+                const wrapper = row.closest('.carousel');
+                if(!wrapper) return;
+                const prev = wrapper.querySelector('.carousel-btn.prev');
+                const next = wrapper.querySelector('.carousel-btn.next');
+                const card = row.querySelector('.card');
+                function scrollBy(direction){
+                    const gap = parseInt(getComputedStyle(row).gap) || 12;
+                    const cardWidth = card ? card.getBoundingClientRect().width + gap : 360;
+                    row.scrollBy({ left: cardWidth * direction, behavior: 'smooth' });
+                }
+                if(prev) prev.addEventListener('click', ()=> scrollBy(-1));
+                if(next) next.addEventListener('click', ()=> scrollBy(1));
+
+                // Evitar que el usuario haga scroll horizontal manual
+                row.addEventListener('wheel', (e)=>{ e.preventDefault(); }, {passive:false});
+                row.addEventListener('touchmove', (e)=>{ e.preventDefault(); }, {passive:false});
+            });
+        })();
     </script>
 </body>
 </html>
