@@ -130,6 +130,17 @@
                 errorMsg.textContent = "Acceso denegado. Verifica tus datos.";
             }
         };
+        // Función para detectar la tecla ENTER
+        const inputs = [document.getElementById("email"), document.getElementById("password")];
+
+        inputs.forEach(input => {
+            input.addEventListener("keypress", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Evita que la página se recargue
+                    btnLogin.click();       // Ejecuta la misma lógica del botón entrar
+                }
+            });
+        });
     </script>
 </body>
 </html>
