@@ -241,6 +241,11 @@
         import { globalLogout } from "./js/seguridad.js";
 
         const ADMIN_EMAIL = "admin@ripper.com";
+        function normalizar(texto) {
+            return texto.toString().toLowerCase()
+                .normalize("NFD") // Descompone caracteres (ej: á -> a + ´)
+                .replace(/[\u0300-\u036f]/g, ""); // Elimina los acentos
+        }
 
         let allTemas = []; // Cache local
 
@@ -295,11 +300,12 @@
 
         // ── Filtro de búsqueda ──
         document.getElementById("search-admin").addEventListener("input", e => {
-            const q = e.target.value.toLowerCase();
+            const q = normalizar(e.target.value); // Normalizamos la búsqueda
+            
             renderTabla(allTemas.filter(t =>
-                (t.titulo||"").toLowerCase().includes(q) ||
-                (t.artista||"").toLowerCase().includes(q) ||
-                (t.tonalidad||"").toLowerCase().includes(q)
+                normalizar(t.titulo || "").includes(q) ||
+                normalizar(t.artista || "").includes(q) ||
+                normalizar(t.tonalidad || "").includes(q)
             ));
         });
 
